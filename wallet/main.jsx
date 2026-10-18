@@ -1,8 +1,8 @@
 // "Connect wallet" button for the navbars (landing + /play): Privy, Solana wallets only (Phantom, Solflare, …).
 // Built into /wallet.js with `npm run build:wallet` (the site itself stays plain static files).
 // The page puts an empty <div id="wallet-slot"></div> in its navbar and loads config.js + wallet.js.
-// Other scripts can listen for `tamapet:wallet` events (detail: { address } or { address: null }) and use
-// window.tamapetWallet.getToken() for the /api login check.
+// Other scripts can listen for `tamapet:wallet` events (detail: { address, ready }) and use window.tamapetWallet:
+// getToken() for the /api login check, login() to open the wallet login.
 import { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { PrivyProvider, usePrivy } from '@privy-io/react-auth';
@@ -34,12 +34,15 @@ function WalletButton() {
   const address = authenticated ? user?.wallet?.address ?? null : null;
 
   // Tell the rest of the page who is connected (cloud save, leaderboard). getToken() = Privy login token for /api.
+  // `ready`: Privy has finished checking for an existing login (until then "no address" doesn't mean logged out).
   const tokenRef = useRef(getAccessToken);
   tokenRef.current = getAccessToken;
+  const loginRef = useRef(login);
+  loginRef.current = login;
   useEffect(() => {
-    window.tamapetWallet = { address, getToken: () => tokenRef.current() };
-    window.dispatchEvent(new CustomEvent('tamapet:wallet', { detail: { address } }));
-  }, [address]);
+    window.tamapetWallet = { address, ready, getToken: () => tokenRef.current(), login: () => loginRef.current() };
+    window.dispatchEvent(new CustomEvent('tamapet:wallet', { detail: { address, ready } }));
+  }, [address, ready]);
 
   useEffect(() => {
     if (!open) return undefined;

@@ -581,3 +581,7 @@ Open threads, in priority-ish order:
 - Removed from the landing (2026-10-18): step 03 "Tokenise your pet on pump.fun" sentence, the "Traders" card (Who it's for now 2 cards: Pet lovers, Charity-minded), FAQ "Can I tokenise my pet?" and "Where do the trading fees go?". Kept: FAQ "Is this financial advice?" + footer legal line (both mention tokens in general).
 - FAQ now (2026-10-18): What is TamaPet? · What animals can I adopt? · How do I level up? (updated: feed/bath, minigames, daily quests, spin) · What can I play? (10 games) · What are daily quests? · What are TamaPoints for? (shop colours). Financial-advice FAQ + footer text removed (footer: "© 2026 TamaPet." + model credit).
 - "GamePoints … clothes and items" fixed everywhere on the landing → TamaPoints / new colours (Why tile, How step 02).
+
+## Wallet required to play (2026-10-18)
+- Without a connected wallet you can only browse/pick an animal. Picking → LCD "CONNECT WALLET" screen (pet shown); ● opens the Privy login (game emits {type:'login'} → window.tamapetWallet.login()); ★ back to picking. Once connected (and after any cloud save has loaded) the game continues: cloud pet → home, local pet → home (uploaded), else naming with the picked animal. Disconnecting (or a returning browser-only pet with no wallet) → connect screen.
+- wallet.js now reports `ready` (Privy finished checking an existing login) so returning users don't flash the connect screen; game.setWallet(true/false) called by play.js only when ready.

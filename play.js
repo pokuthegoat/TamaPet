@@ -23,7 +23,7 @@ const view = createDeviceView(document.getElementById('device'), {
   onReady: () => document.getElementById('loading').classList.add('is-done'),
   onFrame: () => {
     game.update();
-    game.takeEvents().forEach(toast);
+    game.takeEvents().forEach((ev) => (ev.type === 'login' ? window.tamapetWallet?.login?.() : toast(ev)));
     game.draw(lcd);
     const h = game.hint();
     if (hint.textContent !== h) hint.textContent = h;
@@ -321,12 +321,13 @@ async function pushCloud() {
   cloud.busy = false;
   if (cloud.again) { cloud.again = false; queueCloud(); }
 }
-async function onWallet(address) {
+async function onWallet(address, ready = true) {
+  if (!ready) return; // Privy still checking for an existing login
+  if (!address) { cloud.wallet = null; cloud.on = false; clearTimeout(cloud.timer); game.setWallet(false); return; }
   if (address === cloud.wallet) return;
   cloud.wallet = address;
   cloud.on = false;
   clearTimeout(cloud.timer);
-  if (!address) return;
   try {
     const { data, updatedAt } = await cloudApi('GET');
     if (cloud.wallet !== address) return; // switched wallets meanwhile
@@ -344,9 +345,10 @@ async function onWallet(address) {
   } catch (e) {
     console.warn('[TamaPet] cloud save unavailable:', e.message);
   }
+  if (cloud.wallet === address) game.setWallet(true); // let them play (after any cloud pet has loaded)
 }
-window.addEventListener('tamapet:wallet', (e) => onWallet(e.detail.address));
-if (window.tamapetWallet?.address) onWallet(window.tamapetWallet.address);
+window.addEventListener('tamapet:wallet', (e) => onWallet(e.detail.address, e.detail.ready));
+if (window.tamapetWallet) onWallet(window.tamapetWallet.address, window.tamapetWallet.ready);
 // Leaving / hiding the page: send anything still waiting.
 document.addEventListener('visibilitychange', () => { if (document.hidden && cloud.on) { clearTimeout(cloud.timer); pushCloud(); } });
 

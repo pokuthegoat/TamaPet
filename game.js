@@ -51,7 +51,8 @@ export function resetSave() {
 export function createGame({ onSave } = {}) {
   const d = load();
   const g = { screen: d.animal == null ? 'pick' : !d.name ? 'name' : 'home', t0: performance.now(), sel: 0, pick: 0, game: 0, gain: 0, up: false,
-    nameBuf: '', nameIdx: 0, queue: [], events: [] };
+    nameBuf: '', nameIdx: 0, queue: [], events: [],
+    wallet: null, pending: null }; // wallet: null = not known yet, true / false; pending = animal picked before connecting
   const held = { heart: false, circle: false, star: false, up: false, down: false, left: false, right: false };
   let mg = null; // running minigame: { def, inst, startAt, paused, last, done }
   const now = () => performance.now();
@@ -134,9 +135,16 @@ export function createGame({ onSave } = {}) {
   function press(btn) {
     if (btn in held) held[btn] = true;
     switch (g.screen) {
+      case 'connect':
+        if (btn === 'circle') g.events.push({ type: 'login' }); // the page opens the wallet login
+        if (btn === 'star' && !hasPet()) go('pick');
+        break;
       case 'pick':
         if (NEXT[btn]) g.pick = (g.pick + NEXT[btn] + ANIMALS.length) % ANIMALS.length;
-        if (btn === 'circle') { d.animal = g.pick; save(); startNaming(); }
+        if (btn === 'circle') {
+          if (g.wallet !== true) { g.pending = g.pick; go('connect'); break; } // playing needs a connected wallet
+          d.animal = g.pick; save(); startNaming();
+        }
         break;
       case 'home':
         if (NEXT[btn]) g.sel = (g.sel + NEXT[btn] + MENU.length) % MENU.length;
@@ -197,6 +205,8 @@ export function createGame({ onSave } = {}) {
 
   // ---- time ----
   function update() {
+    // No wallet, no playing: only choosing an animal works without one.
+    if (g.wallet === false && g.screen !== 'pick' && g.screen !== 'connect') { mg = null; go('connect'); }
     const s = t();
     if ((g.screen === 'feed' || g.screen === 'bath') && s > 3.2) next();
     if ((g.screen === 'full' || g.screen === 'clean') && s > 1.8) go('home');
@@ -237,6 +247,11 @@ export function createGame({ onSave } = {}) {
     lcd.clear();
     const s = t();
     switch (g.screen) {
+      case 'connect': {
+        lcd.sprite(ANIMALS[d.animal ?? g.pending ?? g.pick].rows, 8, 2 + bob(s), { pet: true });
+        if (Math.floor(s * 2) % 3 !== 2) { lcd.textC('CONNECT', 22); lcd.textC('WALLET', 28); }
+        break;
+      }
       case 'pick': {
         lcd.textC('PICK', 1);
         lcd.sprite(ANIMALS[g.pick].rows, 8, 8 + bob(s), { pet: true });
@@ -326,6 +341,7 @@ export function createGame({ onSave } = {}) {
   function hint() {
     switch (g.screen) {
       case 'pick': return '♥ next animal · ● choose';
+      case 'connect': return 'Connect your wallet to play · ● connect' + (hasPet() ? '' : ' · ★ back');
       case 'home': return '♥ next · ● open';
       case 'play': return '♥ next game · ● start · ★ back';
       case 'game': return mg.done ? '● continue' : mg.def.hint;
@@ -395,6 +411,16 @@ export function createGame({ onSave } = {}) {
   }
   if (d.spinPending != null) claimSpin();
 
+  // ---- wallet gate: the page reports whether a wallet is connected (after any cloud save has loaded) ----
+  function setWallet(on) {
+    g.wallet = on;
+    if (on && g.screen === 'connect') {
+      if (hasPet()) go(d.name ? 'home' : 'name');
+      else if (g.pending != null) { d.animal = g.pending; g.pending = null; save(); startNaming(); }
+      else go('pick');
+    }
+  }
+
   // ---- cloud save: swap in a save loaded from the player's wallet ----
   const data = () => JSON.parse(JSON.stringify(d));
   const hasPet = () => d.animal != null;
@@ -409,7 +435,7 @@ export function createGame({ onSave } = {}) {
   }
 
   return { press, release, typeKey, update, draw, hint, info, rename, takeEvents, spinAvailable, spin, claimSpin,
-    data, hasPet, setData,
+    data, hasPet, setData, setWallet,
     buy, equip, look,
     get screen() { return g.screen; } };
 }
