@@ -164,3 +164,37 @@ const lenis = (function initLenis() {
     ScrollTrigger.refresh();
   });
 })();
+
+// Live counter: real animals saved by all players (api/stats.js). Counts up when it scrolls into view, then
+// checks for new saves every 15 s. The local test server has no /api, so it reads the live site's number.
+(function initSavedCounter() {
+  const el = document.getElementById('savedCount');
+  if (!el) return;
+  const api = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'https://tamapet-alpha.vercel.app' : '';
+  let shown = 0, target = 0, seen = false, raf = 0;
+  const fmt = (n) => Math.round(n).toLocaleString('en-US');
+  const animate = () => {
+    cancelAnimationFrame(raf);
+    const from = shown, t0 = performance.now(), dur = reduceMotion ? 0 : 1400;
+    const step = (now) => {
+      const k = dur ? Math.min(1, (now - t0) / dur) : 1;
+      shown = from + (target - from) * (1 - Math.pow(1 - k, 3));
+      el.textContent = fmt(shown);
+      if (k < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  };
+  const load = async () => {
+    try {
+      const r = await fetch(`${api}/api/stats`, { cache: 'no-store' });
+      if (!r.ok) return;
+      const { saved } = await r.json();
+      if (typeof saved === 'number' && saved !== target) { target = saved; if (seen) animate(); }
+    } catch { /* offline: keep the last number */ }
+  };
+  new IntersectionObserver((entries) => {
+    if (entries.some((e) => e.isIntersecting) && !seen) { seen = true; animate(); }
+  }, { threshold: 0.4 }).observe(el);
+  load();
+  setInterval(load, 15000);
+})();
