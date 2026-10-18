@@ -560,3 +560,9 @@ Open threads, in priority-ish order:
 - Connected state: shortened address + green dot, menu Copy address / Disconnect. Fires `tamapet:wallet` events + window.tamapetWallet.address for the cloud save later.
 - Verified: button on both pages, Privy login modal opens with the Solana wallet list, no errors. Actual wallet connection to be tested by the user. User must add localhost:8080 + the Vercel domain to Privy allowed domains.
 - vercel.json now also pins a plain static deploy (framework null, no-op install/build, outputDirectory ".") — otherwise Vercel would auto-detect Vite from package.json and build/serve the wrong thing.
+
+## Cloud save (2026-10-18)
+- Supabase project imgngvgdqalbgnzbtagp (org MarketOS). Table public.saves (user_id text PK = Privy DID, wallet, name, level, saved, data jsonb, updated_at); RLS on, no policies → public key blocked; service_role granted select/insert/update/delete (new projects don't auto-grant).
+- api/save.js (+ api/_lib.js): GET/POST, verifies the Privy login token itself (ES256 JWT via Privy JWKS, node:crypto) and looks up the Solana wallet via Privy's REST API; writes via Supabase REST with the secret key; sanity checks (size ≤ 64 KB, level/xp/tp/saved ranges, name A–Z0–9 ≤ 8). No npm deps → vercel.json no-op install still fine. Tested locally: no/garbage/forged token → 401; DB round trip OK.
+- Client: wallet.js exposes window.tamapetWallet.getToken(); game.js createGame({ onSave }) + data()/hasPet()/setData(); play.js: on connect GET → cloud save replaces local (toast "loaded … from your wallet"), or if none, uploads the local pet; afterwards every change POSTs (debounced 1.5 s, flush on hide).
+- Vercel needs env vars: PRIVY_APP_ID, PRIVY_APP_SECRET, SUPABASE_URL, SUPABASE_SECRET_KEY (values in .env.local).

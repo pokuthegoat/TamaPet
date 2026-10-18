@@ -29,14 +29,16 @@ const NAME_KEYS = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'DEL', 'OK'];
 const fresh = () => ({ animal: null, name: '', level: 1, xp: 0, saved: 0, tp: 0, lastFeed: 0, lastBath: 0, best: {}, quests: null,
   spinDay: '', spinPending: null,
   owned: { device: [DEFAULTS.device], pet: [DEFAULTS.pet] }, equipped: { ...DEFAULTS } });
+// A save object with every field present (older saves / cloud saves get the missing ones filled in).
+function normalise(raw) {
+  const d = { ...fresh(), ...(raw || {}) };
+  if (typeof d.best === 'number') d.best = { SNAKE: d.best }; // older saves: one Snake best score
+  if (!d.owned) d.owned = { device: [DEFAULTS.device], pet: [DEFAULTS.pet] };
+  if (!d.equipped) d.equipped = { ...DEFAULTS };
+  return d;
+}
 function load() {
-  try {
-    const d = { ...fresh(), ...JSON.parse(localStorage.getItem(KEY)) };
-    if (typeof d.best === 'number') d.best = { SNAKE: d.best }; // older saves: one Snake best score
-    if (!d.owned) d.owned = { device: [DEFAULTS.device], pet: [DEFAULTS.pet] };
-    if (!d.equipped) d.equipped = { ...DEFAULTS };
-    return d;
-  } catch { return fresh(); }
+  try { return normalise(JSON.parse(localStorage.getItem(KEY))); } catch { return fresh(); }
 }
 function store(d) {
   try { localStorage.setItem(KEY, JSON.stringify(d)); } catch { /* private mode etc.: play on unsaved */ }
@@ -46,7 +48,7 @@ export function resetSave() {
   try { localStorage.removeItem(KEY); } catch { /* nothing saved */ }
 }
 
-export function createGame() {
+export function createGame({ onSave } = {}) {
   const d = load();
   const g = { screen: d.animal == null ? 'pick' : !d.name ? 'name' : 'home', t0: performance.now(), sel: 0, pick: 0, game: 0, gain: 0, up: false,
     nameBuf: '', nameIdx: 0, queue: [], events: [] };
@@ -56,6 +58,8 @@ export function createGame() {
   const t = () => (now() - g.t0) / 1000;
   const go = (screen) => { g.screen = screen; g.t0 = now(); };
   const pet = () => ANIMALS[d.animal ?? g.pick].rows;
+  // Every change: saved in the browser, and handed to the page (cloud save when a wallet is connected).
+  const save = () => { store(d); onSave?.(d); };
 
   // Adds XP; a new level (each level = one real animal saved) queues the level-up screen. `counts`: whether it
   // counts toward today's "earn N XP" quest (quest rewards don't).
@@ -70,7 +74,7 @@ export function createGame() {
     }
     if (up && !g.queue.some((q) => q.type === 'levelup')) g.queue.push({ type: 'levelup' });
     if (counts && n > 0) { quests().xpToday += n; questEvent('xp'); }
-    store(d);
+    save();
   }
 
   // After feeding, bathing or a game: show what's queued (level up), then home.
@@ -81,7 +85,7 @@ export function createGame() {
 
   // ---- daily quests ----
   function quests() {
-    if (!d.quests || d.quests.day !== today()) { d.quests = makeDay(today()); store(d); }
+    if (!d.quests || d.quests.day !== today()) { d.quests = makeDay(today()); save(); }
     return d.quests;
   }
   function questEvent(kind, info = {}) {
@@ -103,7 +107,7 @@ export function createGame() {
         addXp(r.xp, false);
       }
     }
-    store(d);
+    save();
   }
 
   function startGame() {
@@ -132,7 +136,7 @@ export function createGame() {
     switch (g.screen) {
       case 'pick':
         if (NEXT[btn]) g.pick = (g.pick + NEXT[btn] + ANIMALS.length) % ANIMALS.length;
-        if (btn === 'circle') { d.animal = g.pick; store(d); startNaming(); }
+        if (btn === 'circle') { d.animal = g.pick; save(); startNaming(); }
         break;
       case 'home':
         if (NEXT[btn]) g.sel = (g.sel + NEXT[btn] + MENU.length) % MENU.length;
@@ -166,7 +170,7 @@ export function createGame() {
   function startNaming() { g.nameBuf = d.name || ''; g.nameIdx = 0; go('name'); }
   function nameKey(k) {
     if (k === 'DEL') g.nameBuf = g.nameBuf.slice(0, -1);
-    else if (k === 'OK') { if (g.nameBuf) { d.name = g.nameBuf; store(d); go('home'); } }
+    else if (k === 'OK') { if (g.nameBuf) { d.name = g.nameBuf; save(); go('home'); } }
     else if (g.nameBuf.length < NAME_MAX) { g.nameBuf += k; if (g.nameBuf.length === NAME_MAX) g.nameIdx = NAME_KEYS.indexOf('OK'); }
   }
   // Keyboard while naming: letters / digits, Backspace, Enter. Returns true if it used the key.
@@ -346,7 +350,7 @@ export function createGame() {
   // Rename from the Stats panel: letters and digits, up to NAME_MAX. Returns the name it saved ('' if none).
   function rename(raw) {
     const name = String(raw).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, NAME_MAX);
-    if (name && d.animal != null) { d.name = name; store(d); if (g.screen === 'name') go('home'); }
+    if (name && d.animal != null) { d.name = name; save(); if (g.screen === 'name') go('home'); }
     return name;
   }
   const takeEvents = () => g.events.splice(0);
@@ -357,13 +361,13 @@ export function createGame() {
     if (!item || d.owned[kind].includes(id) || d.tp < item.price) return false;
     d.tp -= item.price;
     d.owned[kind].push(id);
-    store(d);
+    save();
     return true;
   }
   function equip(kind, id) {
     if (!d.owned[kind]?.includes(id)) return false;
     d.equipped[kind] = id;
-    store(d);
+    save();
     return true;
   }
   const look = () => ({ device: findItem('device', d.equipped.device), pet: findItem('pet', d.equipped.pet) });
@@ -378,7 +382,7 @@ export function createGame() {
     while (r >= SPIN_PRIZES[index].w) { r -= SPIN_PRIZES[index].w; index++; }
     d.spinDay = today();
     d.spinPending = index;
-    store(d);
+    save();
     return { index, prize: SPIN_PRIZES[index] };
   }
   function claimSpin() {
@@ -391,7 +395,21 @@ export function createGame() {
   }
   if (d.spinPending != null) claimSpin();
 
+  // ---- cloud save: swap in a save loaded from the player's wallet ----
+  const data = () => JSON.parse(JSON.stringify(d));
+  const hasPet = () => d.animal != null;
+  function setData(raw) {
+    const nd = normalise(raw);
+    for (const k of Object.keys(d)) delete d[k];
+    Object.assign(d, nd);
+    store(d);
+    mg = null;
+    g.queue.length = 0;
+    go(d.animal == null ? 'pick' : !d.name ? 'name' : 'home');
+  }
+
   return { press, release, typeKey, update, draw, hint, info, rename, takeEvents, spinAvailable, spin, claimSpin,
+    data, hasPet, setData,
     buy, equip, look,
     get screen() { return g.screen; } };
 }

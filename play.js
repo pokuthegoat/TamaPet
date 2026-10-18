@@ -7,7 +7,9 @@ import { CATALOGUE, findItem } from './shop.js';
 
 if (new URLSearchParams(location.search).has('reset')) resetSave();
 
-const game = createGame();
+// cloud save state (used by the game's onSave from the start; the rest is at the bottom)
+const cloud = { on: false, wallet: null, timer: 0, busy: false, again: false };
+const game = createGame({ onSave: () => queueCloud() });
 const lcd = createLcd();
 const hint = document.getElementById('hint');
 
@@ -153,7 +155,7 @@ setInterval(render, 300);
 
 function toast(ev) {
   const t = el('div', 'toast');
-  t.append(el('b', '', { spin: 'Daily spin! ', shop: 'Bought! ', questdone: 'Quest done! ' }[ev.type] || ''), document.createTextNode(ev.text));
+  t.append(el('b', '', { spin: 'Daily spin! ', shop: 'Bought! ', questdone: 'Quest done! ', cloud: 'Cloud save: ' }[ev.type] || ''), document.createTextNode(ev.text));
   $('toasts').append(t);
   setTimeout(() => t.remove(), 4100);
 }
@@ -278,3 +280,59 @@ function closeShop() {
 $('shopTab').addEventListener('click', openShop);
 $('shopClose').addEventListener('click', closeShop);
 $('shop').addEventListener('pointerdown', (e) => { if (e.target === $('shop')) closeShop(); });
+
+// ---- cloud save: progress belongs to the connected wallet (api/save.js + Supabase) ----
+// Connect → load that wallet's save (or, if it has none yet, upload the pet you have here). After that every change
+// is sent up a moment later. Without a wallet (or on the local test server, which has no /api) it's browser-only.
+async function cloudApi(method, body) {
+  const token = await window.tamapetWallet?.getToken?.();
+  if (!token) throw new Error('not logged in');
+  const r = await fetch('/api/save', {
+    method,
+    keepalive: method === 'POST',
+    headers: { Authorization: `Bearer ${token}`, ...(body ? { 'Content-Type': 'application/json' } : {}) },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const out = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(out.error || `HTTP ${r.status}`);
+  return out;
+}
+function queueCloud(delay = 1500) {
+  if (!cloud.on) return;
+  clearTimeout(cloud.timer);
+  cloud.timer = setTimeout(pushCloud, delay);
+}
+async function pushCloud() {
+  if (!cloud.on) return;
+  if (cloud.busy) { cloud.again = true; return; }
+  cloud.busy = true;
+  try { await cloudApi('POST', { data: game.data() }); } catch (e) { console.warn('[TamaPet] cloud save failed:', e.message); }
+  cloud.busy = false;
+  if (cloud.again) { cloud.again = false; queueCloud(); }
+}
+async function onWallet(address) {
+  if (address === cloud.wallet) return;
+  cloud.wallet = address;
+  cloud.on = false;
+  clearTimeout(cloud.timer);
+  if (!address) return;
+  try {
+    const { data } = await cloudApi('GET');
+    if (cloud.wallet !== address) return; // switched wallets meanwhile
+    cloud.on = true;
+    if (data) {
+      game.setData(data);
+      toast({ type: 'cloud', text: `loaded ${data.name || 'your pet'} from your wallet` });
+    } else if (game.hasPet()) {
+      await cloudApi('POST', { data: game.data() });
+      toast({ type: 'cloud', text: 'your pet is now saved to your wallet' });
+    }
+    render(true);
+  } catch (e) {
+    console.warn('[TamaPet] cloud save unavailable:', e.message);
+  }
+}
+window.addEventListener('tamapet:wallet', (e) => onWallet(e.detail.address));
+if (window.tamapetWallet?.address) onWallet(window.tamapetWallet.address);
+// Leaving / hiding the page: send anything still waiting.
+document.addEventListener('visibilitychange', () => { if (document.hidden && cloud.on) { clearTimeout(cloud.timer); pushCloud(); } });
