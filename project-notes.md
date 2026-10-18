@@ -559,3 +559,4 @@ Open threads, in priority-ish order:
 - Solana peer deps pinned to a matching set: @solana/kit ^5, @solana-program/memo 0.10.0, system ^0.10, token ^0.9 (newer memo needs kit 8 → conflict).
 - Connected state: shortened address + green dot, menu Copy address / Disconnect. Fires `tamapet:wallet` events + window.tamapetWallet.address for the cloud save later.
 - Verified: button on both pages, Privy login modal opens with the Solana wallet list, no errors. Actual wallet connection to be tested by the user. User must add localhost:8080 + the Vercel domain to Privy allowed domains.
+- vercel.json now also pins a plain static deploy (framework null, no-op install/build, outputDirectory ".") — otherwise Vercel would auto-detect Vite from package.json and build/serve the wrong thing.
