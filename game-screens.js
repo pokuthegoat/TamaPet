@@ -58,7 +58,7 @@ export const SCREENS = {
     draw(lcd, t, s) {
       lcd.textC('PICK', 1);
       const a = ANIMALS[s.animal];
-      lcd.sprite(a.rows, 8, 9 + bob(t));
+      lcd.sprite(a.rows, 8, 9 + bob(t), { pet: true });
       if (Math.floor(t * 2) % 2 === 0) { lcd.text('<', 1, 15); lcd.text('>', 28, 15); }
       nameLines(lcd, a.name);
     },
@@ -67,7 +67,7 @@ export const SCREENS = {
     label: 'Home',
     draw(lcd, t, s) {
       header(lcd);
-      lcd.sprite(ANIMALS[s.animal].rows, 8, 9 + bob(t));
+      lcd.sprite(ANIMALS[s.animal].rows, 8, 9 + bob(t), { pet: true });
       MENU.forEach((m, i) => lcd.sprite(ICONS[m], menuX(i), 27, { invert: i === s.sel }));
     },
   },
@@ -75,7 +75,7 @@ export const SCREENS = {
     label: 'Feed',
     draw(lcd, t, s) {
       header(lcd);
-      lcd.sprite(ANIMALS[s.animal].rows, 2, 11 + bob(t * 2));
+      lcd.sprite(ANIMALS[s.animal].rows, 2, 11 + bob(t * 2), { pet: true });
       const left = Math.max(0, 3 - Math.floor(t)); // bowl empties over 3 s
       lcd.sprite(BOWL.map((r, j) => (j >= 4 && j < 7 - left ? r.replace(/o/g, '.') : r)), 22, 18);
       if (t > 1) lcd.textC('+XP', 29);
@@ -85,7 +85,7 @@ export const SCREENS = {
     label: 'Bath',
     draw(lcd, t, s) {
       header(lcd);
-      lcd.sprite(ANIMALS[s.animal].rows, 8, 11);
+      lcd.sprite(ANIMALS[s.animal].rows, 8, 11, { pet: true });
       for (let i = 0; i < 5; i++) {
         const x = 3 + ((i * 7) % 26), y = 26 - Math.floor((t * 6 + i * 5) % 18);
         lcd.sprite(BUBBLE, x, y);
@@ -133,7 +133,7 @@ export const SCREENS = {
   stats: {
     label: 'Stats',
     draw(lcd, t, s) {
-      lcd.sprite(ANIMALS[s.animal].rows, 8, 1);
+      lcd.sprite(ANIMALS[s.animal].rows, 8, 1, { pet: true });
       lcd.text('LV', 1, 18); lcd.text(String(demo.level), 28, 18);
       lcd.text('XP', 1, 24); lcd.box(11, 24, 20, 5); lcd.rect(12, 25, Math.round(18 * demo.xp), 3, 1);
       lcd.text('SAVED', 1, 30); lcd.text(String(demo.level), 28, 30);
@@ -144,7 +144,7 @@ export const SCREENS = {
     draw(lcd, t, s) {
       if (Math.floor(t * 3) % 4 !== 3) { lcd.textC('LEVEL', 1); lcd.textC('UP!', 7); }
       const jump = [0, -2, -3, -2][Math.floor(t * 6) % 4];
-      lcd.sprite(ANIMALS[s.animal].rows, 8, 14 + jump);
+      lcd.sprite(ANIMALS[s.animal].rows, 8, 14 + jump, { pet: true });
       lcd.textC('+1 SAVED', 30);
     },
   },

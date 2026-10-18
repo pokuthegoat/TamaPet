@@ -585,3 +585,7 @@ Open threads, in priority-ish order:
 ## Wallet required to play (2026-10-18)
 - Without a connected wallet you can only browse/pick an animal. Picking → LCD "CONNECT WALLET" screen (pet shown); ● opens the Privy login (game emits {type:'login'} → window.tamapetWallet.login()); ★ back to picking. Once connected (and after any cloud save has loaded) the game continues: cloud pet → home, local pet → home (uploaded), else naming with the picked animal. Disconnecting (or a returning browser-only pet with no wallet) → connect screen.
 - wallet.js now reports `ready` (Privy finished checking an existing login) so returning users don't flash the connect screen; game.setWallet(true/false) called by play.js only when ready.
+
+## Ad kit (2026-10-18)
+- User wants an ad via Claude Motion (claude.ai feature, not available in Claude Code). Made `D:\TamaPad\ad-kit\` (git-ignored): images/ (10 transparent 1600² 3D renders — angles + shop colours + level-up/snake screens; 6 flat LCD screens; 2 site screenshots 1920×1080), logos/, PROMPT.md (paste-ready 25 s 9:16 + 16:9 ad brief), README.md (file list + brand colours/fonts).
+- Re-render: `python serve.py` then `node adkit-capture.mjs` (headless Chrome via DevTools protocol, swiftshader WebGL) using `adkit-render.html` (both git-ignored). device-view gained `still/yaw/pitch` options; game-screens design screens now draw pets in their shop colour.

@@ -6,7 +6,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { restyleDevice } from './device-style.js';
 import { attachLcd } from './lcd.js';
 
-export function createDeviceView(canvas, { onPress, onRelease, onReady, onFrame, distance = 4.6, lift = 0, spin = 0, shell = null }) {
+export function createDeviceView(canvas, { onPress, onRelease, onReady, onFrame, distance = 4.6, lift = 0, spin = 0, shell = null, still = false, yaw = 0, pitch = 0 }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.toneMapping = THREE.NeutralToneMapping;
@@ -104,9 +104,12 @@ export function createDeviceView(canvas, { onPress, onRelease, onReady, onFrame,
   let lastLcd = 0;
   function frame(now) {
     const t = clock.getElapsedTime();
-    idle.position.y = Math.sin(t * 0.9) * 0.04;
-    idle.rotation.z = Math.sin(t * 0.7) * 0.02;
-    if (spin) idle.rotation.y += spin * 0.016; // slow turntable (shop preview)
+    if (still) idle.rotation.set(pitch, yaw, 0); // posed (renders for the ad kit)
+    else {
+      idle.position.y = Math.sin(t * 0.9) * 0.04;
+      idle.rotation.z = Math.sin(t * 0.7) * 0.02;
+      if (spin) idle.rotation.y += spin * 0.016; // slow turntable (shop preview)
+    }
     controls.update();
     if (now - lastLcd > 50) { // LCD refresh ~20×/s
       lastLcd = now;

@@ -3,3 +3,6 @@ node_modules/
 .env.local
 .env*.local
 .env
+ad-kit/
+adkit-render.html
+adkit-capture.mjs
