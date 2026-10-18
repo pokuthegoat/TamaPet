@@ -14,28 +14,27 @@ Running log of decisions and open items. Updated as things are shared/decided.
 - Check 3D changes from more than one angle (front AND side) before calling them done.
 - Desktop only — user doesn't care about mobile; don't propose mobile work.
 
-## ▶ START HERE — state at end of session 2026-10-17
-Run: `python D:\TamaPad\serve.py` → http://localhost:8080/ (no-cache dev server, 2026-10-18: a normal reload picks up changes. The old `python -m http.server` let Chrome run stale JS modules).
+## ▶ START HERE — state at end of session 2026-10-18
 
-**Files:** `index.html`, `styles.css`, `script.js` (Lenis, GSAP text reveals, FAQ, orbs parallax, reload-to-top), `three-scene.js` (3D scene, scroll path, cursor follow, idle, chain), `device-style.js` (restyles the model at load: colours, logo, label, screen pet, wings removed, rebuilt buttons), `assets/tamagotchi.glb` (14 MB original model), `assets/gsap/*` (local GSAP plugins).
+### FIRST THING NEXT SESSION: build the launch video from the storyboard
+- Storyboard approved-ish (user went offline right after seeing it): `ad-kit/storyboard/storyboard.png` (8 frames, 9:16, ~20.5 s). Scenes: 01 Boot-up (black, one glowing LCD pixel, types "> booting tamapet_", zoom punch) · 02 Reveal (whip zoom out, 3D device spins in with motion blur, rim-light sweep, masked "Meet your new pet.") · 03 Pick a pet (LCD close-up cat→dog→polar bear in hard steps, typed text, ● press ring) · 04 Care (orbit, real feed→bath animation, "+10 XP" flies at camera) · 05 Play (0.5 s cuts of real Snake/Flap/Space/Blocks/Pong/Racer, zoom punch + flash, "10 retro games") · 06 Make it yours (spin, shell swaps blue→pink(rainbow pet)→gold→mint→black on the beat, light sweep) · 07 Mission ("LEVEL UP!", push-in, glowing "+1 SAVED", pixel sparks, "Every level / saves a real animal.") · 08 End card (device blurred back, pixel-cat logo builds in with glow, "TamaPet" types, tagline, tamapet-alpha.vercel.app/play, @UseTamaPet).
+- User's style brief: very quick and swift, smooth After-Effects feel, nice glows and zooms, everything shown with ORIGINAL animations (live 3D, real LCD games) and TYPING animations. The first attempt (ad-kit/ad.html → TamaPet-ad-*.mp4, still images + simple pop-ins) was "pretty bad" — don't reuse its approach.
+- Plan: animate the LIVE 3D device (three.js, camera moves/orbits/push-ins, shell colour swaps via setShell) + live LCD content (game-screens / games.js) + GSAP timeline with glows/zooms/typing, then render frame by frame to MP4 like ad-kit/render.mjs (headless Chrome + ad-kit/tools ffmpeg-static). 9:16 first, then 16:9. No music (user adds). Avoid full-size CSS mix-blend/grain overlay layers in headless capture (froze screenshots) — do grain in canvas/WebGL instead.
+- Ad tooling (all git-ignored): ad-kit/ (images, logos, PROMPT.md, README.md, ad.html, render.mjs, tools/ffmpeg), adkit-render.html + adkit-capture.mjs (posed 3D renders: `node adkit-capture.mjs` / `sb` / `sb sheet`). Claude Motion is Team/Enterprise only — user can't use it.
 
-**What the site is now (desktop):**
-- Plain royal-blue page (`#0B3986`) + short light-blue gradient at the very top + 9 soft drifting background orbs with light scroll parallax.
-- 3D Tamagotchi (blue shell, cream T logo/buttons, pixel cat on screen, back label "TamaPad") on a fixed full-screen canvas. Layering: text < device < buttons/icons < navbar.
-- It follows the whole page on the round serpentine path (Path v5): hero right → spin at The hook/Why → loops over the 3 hidden How-it-works image boxes → spin at Who → ends lower-left above the footer. Idle float + cursor tilt on top.
-- Chain: clean code-built chrome ball chain hooked through a clean ring; zero-gravity behaviour (pushed opposite to movement, stays where it ends up); loads resting leaned right, no entrance flick.
-- Two-lane layout so text sits beside the path (right lane where the device is on the left).
-- Headings light up word by word on scroll; other text fades/rises in; hero title rises in after the loader. FAQ opens/closes smoothly (GSAP height).
-- Who-it's-for: pixel icons (paw / coin / heart). Footer has the CC BY credit for the model. Reload always starts at the top.
+### Run / deploy
+- Local: `python D:\TamaPad\serve.py` → http://localhost:8080/ (no-cache dev server). Game: /play.html (local) = /play (live).
+- Live: https://tamapet-alpha.vercel.app (Vercel, auto-deploys from GitHub https://github.com/pokuthegoat/TamaPet, branch main). vercel.json: cleanUrls + plain static (no install/build). Everything is pushed.
+- Secrets: `.env.local` (git-ignored): PRIVY_APP_ID/SECRET, SUPABASE_URL/PUBLISHABLE_KEY/SECRET_KEY — also set in Vercel env vars (redeploy needed after changing them).
+- Wallet button: edit wallet/main.jsx → `npm run build:wallet` → commit wallet.js.
 
-**Tried and rejected (don't redo unless asked):** chain per-bead physics, pendulum sway, upright/drooped chain variants, entrance flick; path v1–v4; fast-scroll "progress along path" smoothing (reverted, fast-scroll corner-cutting is back); pixel illustrations (code-generated = bad; user's image pixelated looked good but clashed with the 3D device → removed); animated screen pet / ending CTA / interactive device ideas (user said no); in-code outline rounding (serrated → reverted).
+### What exists now
+- Landing (index.html): royal blue + orbs + top gradient, 3D Tamagotchi on the scroll path, cat pixel logo (navbar + favicon), X button (→ x.com/UseTamaPet, image logo) left of Connect wallet, live "animals saved" counter section, FAQ (6 playing questions). All pump.fun / tokenising / financial-advice text removed.
+- /play: 3D device game (pick dog/cat/polar bear, name, feed/bath, 10 minigames), navbar: Stats · Quests (5 daily) · Daily spin · Shop (device + pet colours) · Leaderboard · TP · Connect wallet. Wallet REQUIRED to play (connect screen after picking). Cloud save to Supabase per wallet (Privy-verified, version check so stale tabs can't overwrite).
+- Name: TamaPet (was TamaPad). Currency: TamaPoints. Pet-coin launching: DROPPED by the user.
 
-**Open / possible next:**
-1. Site still feels like "something is missing" (user can't say what); background boredom only partly solved (orbs + top gradient).
-2. Fast-scroll corner-cutting through How it works (fix was reverted without reason — ask before retrying).
-3. Rounder outline / wing ghost bumps → needs a 3D-editor pass on the .glb (Blender) or a better model.
-4. Model is 14 MB — could be compressed (~2–4 MB) with no visible loss.
-5. X/Twitter links point to x.com (account not made yet). Game vs charity content split (from 10-16) never done.
+### Open / possible next (after the video)
+- 15 MB model → compress. "T" badge on the device front vs the cat logo (asked, no answer). Pet needs (hunger etc.) undecided. Fast-scroll corner-cutting on the landing path (fix was reverted — ask first).
 
 ## ▶ NARRATIVE CHANGE (2026-10-18)
 - Main story: **1 level in the game = 1 real animal saved in real life.** Literally, one to one.
