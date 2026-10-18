@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TamaPet — Play</title>
+<meta name="description" content="Raise your TamaPet pet. Every level you reach saves a real animal." />
+<link rel="icon" type="image/svg+xml" href="assets/logo/tamapet-icon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#0B3986; --cream:#EFE3D3; --line:rgba(239,227,211,.16); --glass:rgba(11,40,100,.72);}
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{font-family:"DM Sans",sans-serif; color:var(--cream); background:var(--navy); overflow:hidden;
+    background-image:radial-gradient(circle at 50% 46%, #2d63c9 0, rgba(45,99,201,0) 50%),
+      linear-gradient(180deg, #3f74d8 0, #24539f 160px, var(--navy) 380px);}
+  button{font:inherit; color:inherit; cursor:pointer; border:none; background:none;}
+
+  /* ---- navbar (frosted pill, like the landing page) ---- */
+  .nav{position:fixed; top:16px; left:50%; transform:translateX(-50%); width:min(1040px, calc(100% - 32px)); z-index:10;
+    display:flex; align-items:center; gap:8px; padding:8px 8px 8px 16px; border-radius:16px;
+    background:rgba(255,255,255,.08); border:1px solid var(--line); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);}
+  .logo{display:flex; align-items:center; gap:10px; color:inherit; text-decoration:none; font-weight:700; font-size:16px; margin-right:auto;}
+  .logo img{width:28px; height:28px; display:block;}
+  .tab{display:flex; align-items:center; gap:8px; padding:9px 14px; border-radius:10px; font-size:14px; font-weight:500;}
+  .tab:hover, .tab[aria-expanded="true"]{background:rgba(255,255,255,.1);}
+  .badge{font-size:12px; padding:2px 7px; border-radius:99px; background:rgba(239,227,211,.16);}
+  .tp{display:flex; align-items:center; gap:6px; padding:9px 12px; border-radius:10px; background:var(--cream); color:var(--navy); font-size:14px; font-weight:700;}
+  .back{color:inherit; opacity:.75; text-decoration:none; font-size:14px; padding:9px 10px;}
+  .back:hover{opacity:1;}
+
+  /* ---- dropdown panels ---- */
+  .panel{position:fixed; top:84px; right:max(16px, calc(50% - 520px)); width:380px; max-height:calc(100vh - 110px); overflow:auto; z-index:9;
+    padding:20px; border-radius:16px; background:var(--glass); border:1px solid var(--line);
+    backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); box-shadow:0 20px 60px rgba(0,0,0,.25);}
+  .panel[hidden]{display:none;}
+  .panel h2{font-size:20px; font-weight:500; letter-spacing:-.01em;}
+  .muted{opacity:.65; font-size:13px;}
+  .row{display:flex; align-items:center; justify-content:space-between; gap:12px;}
+  .bar{height:8px; border-radius:99px; background:rgba(239,227,211,.15); overflow:hidden;}
+  .bar i{display:block; height:100%; border-radius:inherit; background:var(--cream);}
+  .tiles{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:16px 0;}
+  .tile{padding:12px 14px; border-radius:12px; background:rgba(255,255,255,.06); border:1px solid var(--line);}
+  .tile strong{display:block; font-size:24px; font-weight:500;}
+  .tile span{font-size:12px; opacity:.7;}
+  .scores{display:grid; grid-template-columns:1fr 1fr; gap:6px 18px; font-size:14px; margin-top:8px;}
+  .scores span:last-child{opacity:.75;}
+  .small-btn{font-size:13px; padding:6px 10px; border-radius:8px; border:1px solid var(--line); background:rgba(255,255,255,.06);}
+  .small-btn:hover{background:rgba(255,255,255,.14);}
+  .rename{display:flex; gap:8px; margin-top:10px;}
+  .rename[hidden]{display:none;}
+  .rename input{flex:1; min-width:0; font:inherit; font-size:15px; text-transform:uppercase; letter-spacing:.08em; color:var(--cream);
+    background:rgba(255,255,255,.08); border:1px solid var(--line); border-radius:8px; padding:7px 10px; outline:none;}
+  .rename input:focus{border-color:var(--cream);}
+  .quests{list-style:none; display:flex; flex-direction:column; gap:10px; margin-top:14px;}
+  .quest{display:grid; grid-template-columns:22px 1fr; gap:10px; padding:12px; border-radius:12px; background:rgba(255,255,255,.06); border:1px solid var(--line);}
+  .quest.done{opacity:.6;}
+  .check{width:22px; height:22px; border-radius:50%; border:1.5px solid rgba(239,227,211,.5); display:grid; place-items:center; font-size:13px;}
+  .quest.done .check{background:var(--cream); color:var(--navy); border-color:var(--cream);}
+  .quest p{font-size:14px; line-height:1.35;}
+  .quest .bar{margin-top:8px; height:6px;}
+  .chips{display:flex; gap:6px; margin-top:8px; font-size:12px;}
+  .chips span{padding:2px 8px; border-radius:99px; background:rgba(239,227,211,.14);}
+
+  /* ---- daily spin ---- */
+  .dot{width:8px; height:8px; border-radius:50%; background:#ffd36b; box-shadow:0 0 0 3px rgba(255,211,107,.25);}
+  .dot[hidden]{display:none;}
+  .wheel-wrap{position:relative; width:280px; height:280px; margin:18px auto 6px;}
+  .wheel{width:100%; height:100%; display:block; transition:transform 4.6s cubic-bezier(.12,.72,.08,1);}
+  .pointer{position:absolute; top:-6px; left:50%; transform:translateX(-50%); width:0; height:0;
+    border-left:12px solid transparent; border-right:12px solid transparent; border-top:20px solid var(--cream);
+    filter:drop-shadow(0 3px 4px rgba(0,0,0,.35));}
+  .spin-btn{display:block; width:100%; margin-top:14px; padding:12px; border-radius:10px; background:var(--cream); color:var(--navy); font-weight:700; font-size:15px;}
+  .spin-btn:disabled{opacity:.45; cursor:default;}
+  .spin-result{text-align:center; margin-top:12px; font-size:15px; min-height:22px;}
+
+  /* ---- shop (window: buy on the left, preview + equip on the right) ---- */
+  .shop{position:fixed; inset:0; z-index:15; display:grid; place-items:center; padding:84px 16px 24px; background:rgba(4,18,56,.5);
+    backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);}
+  .shop[hidden]{display:none;}
+  .shop-box{width:min(940px, 100%); max-height:100%; display:grid; grid-template-columns:minmax(0,1.25fr) minmax(300px,1fr); overflow:hidden;
+    border-radius:20px; background:var(--glass); border:1px solid var(--line); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+    box-shadow:0 30px 80px rgba(0,0,0,.35);}
+  .shop-list{padding:24px; overflow:auto;}
+  .shop-list h2{font-size:24px; font-weight:500; letter-spacing:-.01em;}
+  .shop-list h3{font-size:12px; letter-spacing:.14em; text-transform:uppercase; font-weight:500; opacity:.65; margin:22px 0 10px;}
+  .swatches{display:grid; grid-template-columns:repeat(4, 1fr); gap:10px;}
+  .swatch{display:flex; flex-direction:column; align-items:center; gap:6px; padding:12px 6px 10px; border-radius:12px;
+    border:1px solid var(--line); background:rgba(255,255,255,.05); font-size:13px;}
+  .swatch:hover{background:rgba(255,255,255,.1);}
+  .swatch.is-sel{border-color:var(--cream); background:rgba(239,227,211,.12);}
+  .swatch i{width:38px; height:38px; border-radius:50%; border:2px solid rgba(255,255,255,.35); box-shadow:inset 0 -6px 10px rgba(0,0,0,.18);}
+  .swatch small{font-size:11px; opacity:.7;}
+  .swatch small.own{opacity:1; color:#ffd36b;}
+  .shop-side{position:relative; display:flex; flex-direction:column; padding:20px; background:rgba(0,0,0,.12); border-left:1px solid var(--line);}
+  .shop-close{position:absolute; top:12px; right:12px; width:34px; height:34px; border-radius:9px; font-size:20px; line-height:1; z-index:1;}
+  .shop-close:hover{background:rgba(255,255,255,.1);}
+  #shopDevice{width:100%; height:330px; display:block; cursor:grab;}
+  .shop-pick{text-align:center; margin-top:4px;}
+  .shop-pick b{display:block; font-size:18px; font-weight:500;}
+  .shop-btn{margin-top:14px; padding:13px; border-radius:10px; background:var(--cream); color:var(--navy); font-weight:700; font-size:15px;}
+  .shop-btn:disabled{opacity:.45; cursor:default;}
+
+  /* ---- quest-done notification ---- */
+  .toasts{position:fixed; top:84px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; gap:8px; z-index:11; pointer-events:none;}
+  .toast{padding:12px 16px; border-radius:12px; background:var(--cream); color:var(--navy); font-size:14px; box-shadow:0 10px 30px rgba(0,0,0,.25);
+    animation:toastIn .35s ease-out, toastOut .4s ease-in 3.6s forwards;}
+  .toast b{font-weight:700;}
+  @keyframes toastIn{from{opacity:0; transform:translateY(-8px);}}
+  @keyframes toastOut{to{opacity:0; transform:translateY(-8px);}}
+
+  /* ---- device + controls ---- */
+  #device{position:fixed; inset:0; width:100%; height:100%; display:block; cursor:grab; touch-action:none;}
+  #device:active{cursor:grabbing;}
+  .bottom{position:fixed; left:0; right:0; bottom:26px; display:flex; flex-direction:column; align-items:center; gap:14px; z-index:2; pointer-events:none;}
+  .hint{font-size:14px; opacity:.8; min-height:20px; text-align:center;}
+  .keys{display:flex; gap:8px; pointer-events:auto;}
+  .keys button{width:52px; height:44px; border-radius:10px; border:1px solid var(--line); background:rgba(255,255,255,.07); font-size:18px;}
+  .keys button:hover{background:rgba(255,255,255,.14);}
+  .loading{position:fixed; inset:0; display:grid; place-items:center; font-size:14px; background:var(--navy); z-index:20; transition:opacity .5s;}
+  .loading.is-done{opacity:0; pointer-events:none;}
+</style>
+</head>
+<body>
+<header class="nav">
+  <a class="logo" href="index.html"><img src="assets/logo/tamapet-icon.svg" alt="" />TamaPet</a>
+  <button class="tab" id="statsTab" aria-expanded="false" aria-controls="statsPanel">Stats</button>
+  <button class="tab" id="questsTab" aria-expanded="false" aria-controls="questsPanel">Quests <span class="badge" id="questBadge">0/5</span></button>
+  <button class="tab" id="spinTab" aria-expanded="false" aria-controls="spinPanel">Daily spin <span class="dot" id="spinDot" hidden title="Free spin ready"></span></button>
+  <button class="tab" id="shopTab">Shop</button>
+  <span class="tp" title="TamaPoints"><span id="tpNav">0</span> TP</span>
+  <a class="back" href="index.html">← Site</a>
+</header>
+
+<section class="panel" id="statsPanel" hidden aria-label="Stats">
+  <div class="row">
+    <div>
+      <h2 id="petName">—</h2>
+      <p class="muted" id="petLine"></p>
+    </div>
+    <button class="small-btn" id="renameBtn">Rename</button>
+  </div>
+  <form class="rename" id="renameForm" hidden>
+    <input id="renameInput" maxlength="8" autocomplete="off" spellcheck="false" aria-label="New name (up to 8 letters)">
+    <button class="small-btn" type="submit">Save</button>
+  </form>
+  <div style="margin-top:16px">
+    <div class="row muted"><span id="lvLabel">Level 1</span><span id="xpLabel">0 / 60 XP</span></div>
+    <div class="bar" style="margin-top:6px"><i id="xpBar" style="width:0"></i></div>
+  </div>
+  <div class="tiles">
+    <div class="tile"><strong id="savedVal">0</strong><span>Real animals saved</span></div>
+    <div class="tile"><strong id="tpVal">0</strong><span>TamaPoints</span></div>
+  </div>
+  <p class="muted">Best scores</p>
+  <div class="scores" id="scores"></div>
+</section>
+
+<section class="panel" id="questsPanel" hidden aria-label="Daily quests">
+  <div class="row">
+    <h2>Daily quests</h2>
+    <span class="muted" id="questsReset"></span>
+  </div>
+  <ul class="quests" id="questList"></ul>
+</section>
+
+<section class="panel" id="spinPanel" hidden aria-label="Daily spin">
+  <div class="row">
+    <h2>Daily spin</h2>
+    <span class="muted">1 free spin a day</span>
+  </div>
+  <div class="wheel-wrap">
+    <svg class="wheel" id="wheel" viewBox="-100 -100 200 200" aria-hidden="true"></svg>
+    <div class="pointer"></div>
+  </div>
+  <button class="spin-btn" id="spinBtn">Spin</button>
+  <p class="spin-result" id="spinResult" aria-live="polite"></p>
+</section>
+
+<div class="shop" id="shop" hidden>
+  <div class="shop-box" role="dialog" aria-modal="true" aria-label="Shop">
+    <div class="shop-list">
+      <div class="row"><h2>Shop</h2><span class="tp"><span id="tpShop">0</span> TP</span></div>
+      <h3>Device colours</h3>
+      <div class="swatches" id="deviceSwatches"></div>
+      <h3>Pet colours</h3>
+      <div class="swatches" id="petSwatches"></div>
+    </div>
+    <div class="shop-side">
+      <button class="shop-close" id="shopClose" aria-label="Close shop">×</button>
+      <canvas id="shopDevice" aria-label="Preview"></canvas>
+      <div class="shop-pick"><b id="pickName">—</b><span class="muted" id="pickInfo"></span></div>
+      <button class="shop-btn" id="shopBtn">Equip</button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<canvas id="device" aria-label="TamaPet device — the game is played on its screen"></canvas>
+<div class="bottom">
+  <p class="hint" id="hint"></p>
+  <div class="keys">
+    <button data-btn="heart" aria-label="Heart button">♥</button>
+    <button data-btn="circle" aria-label="Circle button">●</button>
+    <button data-btn="star" aria-label="Star button">★</button>
+  </div>
+</div>
+<div class="loading" id="loading">Loading your pet…</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module" src="play.js"></script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TamaPet — game design (debug)</title>
+<link rel="icon" type="image/svg+xml" href="assets/logo/tamapet-icon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#0B3986; --cream:#EFE3D3; --line:rgba(239,227,211,.16);}
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:"DM Sans",sans-serif; background:var(--navy); color:var(--cream); min-height:100vh;
+    background-image:radial-gradient(circle at 30% 40%, #2a5fc4 0, transparent 55%);}
+  .wrap{display:grid; grid-template-columns:minmax(0,1.25fr) minmax(380px,1fr); min-height:100vh;}
+  .view{position:sticky; top:0; height:100vh;}
+  #device{width:100%; height:100%; display:block; cursor:grab;}
+  #device:active{cursor:grabbing;}
+  .hint{position:absolute; left:24px; bottom:20px; font-size:13px; opacity:.6;}
+  .loading{position:absolute; inset:0; display:grid; place-items:center; font-size:14px; opacity:.7;}
+  .panel{padding:40px 40px 60px 8px;}
+  h1{font-size:30px; font-weight:500; letter-spacing:-.02em; margin-bottom:8px;}
+  .lead{opacity:.75; font-size:15px; line-height:1.5; max-width:520px; margin-bottom:26px;}
+  h2{font-size:12px; letter-spacing:.14em; text-transform:uppercase; opacity:.6; font-weight:500; margin:28px 0 12px;}
+  .controls{display:flex; gap:10px;}
+  .controls button{flex:1; padding:12px 10px; border-radius:10px; border:1px solid var(--line); background:rgba(255,255,255,.06);
+    color:var(--cream); font:inherit; font-size:14px; cursor:pointer;}
+  .controls button:hover{background:rgba(255,255,255,.12);}
+  .controls b{display:block; font-size:20px; margin-bottom:2px;}
+  .grid{display:grid; grid-template-columns:repeat(4,1fr); gap:12px;}
+  .card{cursor:pointer; border-radius:12px; padding:8px; border:1px solid var(--line); background:rgba(255,255,255,.04);}
+  .card.is-on{border-color:var(--cream); background:rgba(239,227,211,.1);}
+  .card canvas{width:100%; display:block; border-radius:6px; image-rendering:pixelated;}
+  .card span{display:block; font-size:12px; margin-top:6px; opacity:.85;}
+  ul.notes{font-size:14px; line-height:1.55; opacity:.8; padding-left:18px;}
+  ul.notes li{margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="view">
+    <canvas id="device"></canvas>
+    <div class="loading" id="loading">Loading device…</div>
+    <p class="hint">Drag to turn the device · click its buttons</p>
+  </div>
+  <div class="panel">
+    <h1>Game design — debug</h1>
+    <p class="lead">The game is played on the Tamagotchi's own screen, with its three buttons, like the real toy. Below are the screens I have in mind. Click one to show it on the device, or play through them with the buttons.</p>
+
+    <h2>Buttons</h2>
+    <div class="controls">
+      <button data-btn="heart"><b>♥</b>Next</button>
+      <button data-btn="circle"><b>●</b>Select</button>
+      <button data-btn="star"><b>★</b>Back</button>
+    </div>
+
+    <h2>Screens</h2>
+    <div class="grid" id="grid"></div>
+
+    <h2>How it would work</h2>
+    <ul class="notes">
+      <li><b>Pick</b> an animal (♥ to flip through, ● to choose).</li>
+      <li><b>Home</b>: level + XP bar at the top, your pet in the middle, 4 icons at the bottom — Feed, Bath, Play, Stats. ♥ moves the highlight, ● opens it.</li>
+      <li><b>Feed / Bath</b>: a short animation, then XP.</li>
+      <li><b>Play</b>: pick a retro minigame (Snake, Pong, Bricks) played right on the screen.</li>
+      <li><b>Level up</b>: "+1 saved" — every level is one real animal saved. Stats shows the running total.</li>
+      <li>Same 3D device and look as the landing page; the page around it stays minimal.</li>
+    </ul>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module" src="debug.js"></script>
+</body>
+</html>

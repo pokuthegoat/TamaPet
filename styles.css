@@ -1,0 +1,304 @@
+/* ---------- TOKENS ---------- */
+:root{
+  --navy:#0B3986;
+  --navy-panel:rgba(239,227,211,0.1);
+  --navy-panel-soft:rgba(239,227,211,0.07);
+  --glass-border:rgba(239,227,211,0.18);
+  --cream:#EFE3D3;
+  --white:#FFFFFF;
+  --white-soft:rgba(255,255,255,0.78);
+  --white-faint:rgba(255,255,255,0.55);
+  --font:'DM Sans', sans-serif;
+  --maxw:1240px;
+  --section-pad:160px;
+}
+
+*{box-sizing:border-box; margin:0; padding:0;}
+html{-webkit-font-smoothing:antialiased;}
+body{
+  font-family:var(--font);
+  color:var(--white);
+  line-height:1.5;
+  overflow-x:hidden;
+  background-color:var(--navy);
+  /* Short light-blue wash at the very top of the page, melting into the page blue (like drone.riotters.com). */
+  background-image:linear-gradient(180deg, #3f74d8 0px, #24539f 160px, var(--navy) 380px);
+  background-repeat:no-repeat;
+  background-size:100% 380px;
+}
+img{max-width:100%; display:block;}
+a{color:inherit; text-decoration:none;}
+ul{list-style:none;}
+button{font-family:inherit; cursor:pointer; border:none; background:none; color:inherit;}
+
+/* ---------- GRAIN (fixed screen-space texture, independent of scroll) ---------- */
+.grain{
+  position:fixed; inset:-50%; width:200%; height:200%; z-index:999;
+  background-repeat:repeat; background-size:160px 160px;
+  opacity:0.05; mix-blend-mode:overlay; pointer-events:none;
+  animation:grainMove .5s steps(1) infinite;
+}
+@keyframes grainMove{
+  0%{background-position:0% 0%;}
+  10%{background-position:-15% 5%;}
+  20%{background-position:10% -10%;}
+  30%{background-position:-5% 15%;}
+  40%{background-position:15% -5%;}
+  50%{background-position:-10% -15%;}
+  60%{background-position:5% 10%;}
+  70%{background-position:-15% -5%;}
+  80%{background-position:10% 15%;}
+  90%{background-position:-5% -10%;}
+  100%{background-position:0% 0%;}
+}
+@media (prefers-reduced-motion: reduce){
+  .grain{animation:none;}
+}
+
+/* ---------- BACKGROUND ORBS ----------
+   Big soft light blobs behind the content (radial gradients, no blur filter — cheap to scroll). Each drifts
+   slowly (CSS) and gets a slight scroll parallax (script.js sets --shift). */
+body{position:relative;}
+.orbs{position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:-1;}
+.orb{
+  position:absolute; top:var(--top); left:var(--left);
+  width:var(--size); height:var(--size); border-radius:50%;
+  transform:translate3d(0, var(--shift, 0px), 0);
+  will-change:transform;
+}
+.orb::before{
+  content:""; position:absolute; inset:0; border-radius:50%;
+  animation:orbDrift var(--drift) ease-in-out infinite alternate;
+}
+.orb--blue::before{background:radial-gradient(circle, rgba(84,136,246,0.55) 0%, rgba(84,136,246,0.2) 38%, rgba(84,136,246,0) 70%);}
+.orb--cream::before{background:radial-gradient(circle, rgba(239,227,211,0.2) 0%, rgba(239,227,211,0.07) 40%, rgba(239,227,211,0) 70%);}
+@keyframes orbDrift{
+  0%{transform:translate(0, 0) scale(1);}
+  50%{transform:translate(6%, -5%) scale(1.06);}
+  100%{transform:translate(-5%, 4%) scale(0.96);}
+}
+@media (prefers-reduced-motion: reduce){
+  .orb::before{animation:none;}
+}
+
+/* ---------- 3D STAGE (fixed, in front of all content; clicks pass through) ---------- */
+/* Layering: page text (in flow) < 3D Tamagotchi (50) < buttons / icons (60) < navbar (100).
+   main/footer deliberately create no stacking context, so their buttons can rise above the device. */
+.stage{position:fixed; inset:0; width:100%; height:100%; display:block; z-index:50; pointer-events:none;}
+.btn, .link-arrow, .faq__toggle, .pixel-icon{position:relative; z-index:60;}
+
+/* ---------- LOADER ---------- */
+.loader{
+  position:fixed; inset:0; z-index:998;
+  background:var(--navy);
+  display:flex; align-items:center; justify-content:center;
+  transition:opacity .6s ease, visibility .6s;
+}
+.loader.is-done{opacity:0; visibility:hidden;}
+.loader__pct{font-size:14px; font-weight:500; letter-spacing:0.12em; color:var(--cream); font-variant-numeric:tabular-nums;}
+
+/* ---------- TYPE ---------- */
+.eyebrow{
+  font-size:13px; font-weight:500; letter-spacing:0.12em; text-transform:uppercase;
+  color:var(--white-soft); margin-bottom:16px;
+}
+.h2{
+  font-size:clamp(28px, 4vw, 44px); font-weight:500; letter-spacing:-0.02em;
+  line-height:1.1; margin-bottom:18px; text-wrap:balance;
+}
+.h3{font-size:22px; font-weight:500; letter-spacing:-0.01em; margin-bottom:10px;}
+.h4{font-size:18px; font-weight:500; margin-bottom:8px;}
+.body{font-size:16px; font-weight:300; color:var(--white-soft);}
+.body-lg{font-size:19px; font-weight:300; color:var(--white-soft); max-width:560px;}
+.body-sm{font-size:14px; font-weight:300; color:var(--white-soft);}
+
+/* ---------- PLACEHOLDERS ---------- */
+.placeholder{
+  background:rgba(255,255,255,0.05);
+  border:1px dashed rgba(255,255,255,0.25);
+  border-radius:16px;
+  display:flex; align-items:center; justify-content:center;
+  text-align:center; font-size:13px; color:var(--white-faint);
+}
+.placeholder--card{width:100%; max-width:420px; height:280px;}
+.placeholder--row{height:260px;}
+/* Image boxes hidden but keep their space: the 3D device's path lands on the how-it-works boxes. */
+.placeholder--card, .placeholder--row{visibility:hidden;}
+.pixel-icon{display:block; width:48px; height:48px; margin-bottom:20px; fill:var(--cream); shape-rendering:crispEdges;}
+
+/* ---------- BUTTONS ---------- */
+.btn{
+  display:inline-flex; align-items:center; gap:10px;
+  font-size:14px; font-weight:500;
+  padding:14px 14px 14px 22px;
+  border-radius:8px;
+  white-space:nowrap;
+}
+.btn--lg{padding:16px 16px 16px 26px; font-size:15px;}
+.btn--primary{background:var(--cream); color:var(--navy);}
+.btn--ghost{background:rgba(255,255,255,0.1); color:var(--white); padding:14px 22px;}
+.btn--ghost.btn--lg{padding:16px 26px;}
+.btn__icon{
+  width:24px; height:24px; border-radius:50%;
+  background:var(--navy); color:var(--cream);
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; flex-shrink:0;
+}
+
+/* ---------- NAV ---------- */
+.nav{position:sticky; top:0; z-index:100; padding:20px 32px;}
+.nav__in{
+  max-width:var(--maxw); margin:0 auto;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:24px; padding:10px 10px 10px 20px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid var(--glass-border);
+  border-radius:14px;
+  backdrop-filter:blur(10px);
+}
+.nav__logo{display:flex; align-items:center; gap:8px; font-weight:700; font-size:17px;}
+.nav__logo-mark{width:28px; height:28px; display:block;} /* pixel-cat logo (assets/logo/tamapet-icon.svg) */
+.nav__links{display:flex; gap:26px;}
+.nav__links a{font-size:14px; font-weight:500; color:var(--white-soft);}
+.nav__links a:hover{color:var(--white);}
+.nav__actions{display:flex; align-items:center; gap:10px;}
+.nav__social{
+  width:38px; height:38px; border-radius:8px;
+  background:rgba(255,255,255,0.08);
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; font-weight:600;
+}
+.nav__burger{display:none; border:1px solid var(--glass-border); background:rgba(255,255,255,0.08); color:var(--white); padding:8px 14px; border-radius:8px; font-size:13px;}
+.nav__mobile{
+  display:none; flex-direction:column; gap:16px;
+  position:absolute; top:calc(100% + 10px); left:32px; right:32px;
+  padding:20px; background:rgba(16,22,56,0.85); border:1px solid var(--glass-border);
+  border-radius:14px; backdrop-filter:blur(10px);
+}
+.nav__mobile a{font-size:15px; font-weight:500;}
+.nav__mobile.is-open{display:flex;}
+
+/* ---------- HERO ---------- */
+.hero{
+  position:relative;
+  min-height:92vh;
+  display:flex; flex-direction:column; justify-content:flex-end;
+  gap:40px;
+  padding:40px 48px 70px;
+}
+.hero__copy{max-width:620px;}
+.hero__title{
+  font-size:clamp(40px, 7vw, 84px); font-weight:500; letter-spacing:-0.03em;
+  line-height:1.02; margin-bottom:22px;
+}
+.hero__sub{font-size:19px; font-weight:300; color:var(--white-soft); max-width:480px;}
+.hero__actions{display:flex; gap:14px; flex-wrap:wrap;}
+
+/* ---------- STRIP ---------- */
+.strip{padding:22px 32px; text-align:center; font-size:14px; color:var(--white-soft); border-top:1px solid var(--glass-border); border-bottom:1px solid var(--glass-border);}
+
+/* ---------- PANELS (generic section wrapper) ---------- */
+.panel{max-width:var(--maxw); margin:0 auto; padding:var(--section-pad) 32px;}
+.panel--center{text-align:center;}
+.panel--narrow{max-width:760px;}
+.panel__sub{margin:0 auto 50px;}
+.panel__head{max-width:640px; margin-bottom:56px;}
+.panel__head--center{max-width:640px; margin:0 auto 64px; text-align:center;}
+
+.panel--split{
+  display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center;
+}
+.link-arrow{display:inline-flex; gap:6px; font-size:14px; font-weight:500; margin-top:8px; border-bottom:1px solid var(--white-soft); padding-bottom:2px;}
+
+/* ---------- BANNER ---------- */
+.banner{padding:var(--section-pad) 32px; text-align:center;}
+.banner .eyebrow{text-align:center;}
+.banner__title{font-size:clamp(32px, 6vw, 56px); font-weight:500; letter-spacing:-0.02em; line-height:1.1;}
+
+/* ---------- STAT GRID ---------- */
+.stat-grid{display:grid; grid-template-columns:repeat(4, 1fr); gap:1px; border-radius:16px; overflow:hidden; border:1px solid var(--glass-border);}
+.stat-tile{
+  padding:32px 24px; display:flex; flex-direction:column; gap:10px;
+  background:var(--navy-panel-soft); backdrop-filter:blur(8px);
+}
+.stat-tile strong{font-size:30px; font-weight:500;}
+.stat-tile span{font-size:13px; font-weight:300; color:var(--white-soft);}
+
+/* ---------- HOW IT WORKS ---------- */
+.how__row{
+  display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center;
+  padding:48px 0; border-top:1px solid var(--glass-border);
+}
+.how__row:last-child{border-bottom:1px solid var(--glass-border);}
+.how__num{display:block; margin-bottom:14px; font-size:13px; font-weight:500; color:var(--white-faint);}
+
+/* ---------- WHO GRID ---------- */
+.who__grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:1px; border-radius:16px; overflow:hidden; border:1px solid var(--glass-border); margin-top:20px;}
+.who__card{position:relative; padding:36px 28px; text-align:left;}
+/* Glass on a layer beneath the card: backdrop-filter on the card itself would trap its icon below the 3D device. */
+.who__card::before{content:""; position:absolute; inset:0; z-index:-1; background:var(--navy-panel-soft); backdrop-filter:blur(8px);}
+
+/* ---------- FAQ ---------- */
+.faq__list{margin-top:36px; border-top:1px solid var(--glass-border);}
+.faq__item{border-bottom:1px solid var(--glass-border);}
+.faq__q{
+  width:100%; display:flex; align-items:center; justify-content:space-between;
+  padding:22px 0; font-size:17px; font-weight:500; text-align:left;
+}
+.faq__toggle{font-size:18px; color:var(--white-soft); margin-left:16px; transition:transform .45s cubic-bezier(.65,0,.35,1);}
+.faq__item.is-open .faq__toggle{transform:rotate(45deg);}
+.faq__a{height:0; overflow:hidden;}
+.faq__a p{padding-bottom:22px; font-size:15px; font-weight:300; color:var(--white-soft); max-width:620px;}
+
+/* ---------- FOOTER ---------- */
+.footer{padding:70px 32px;}
+.footer__in{
+  max-width:var(--maxw); margin:0 auto;
+  display:grid; grid-template-columns:repeat(4, 1fr); gap:32px; padding-bottom:50px;
+}
+.footer__head{font-size:12px; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; color:rgba(239,227,211,0.65); margin-bottom:16px;}
+.footer__col{display:flex; flex-direction:column; gap:12px;}
+.footer__col a{font-size:14px; font-weight:400; color:var(--cream);}
+.footer__col a:hover{color:var(--white);}
+.footer__legal{max-width:var(--maxw); margin:0 auto; font-size:13px; color:rgba(239,227,211,0.65); border-top:1px solid var(--glass-border); padding-top:24px;}
+.footer__credit{border-top:0; padding-top:10px; font-size:12px;}
+.footer__credit a{text-decoration:underline; text-underline-offset:2px;}
+
+/* ---------- TWO-LANE LAYOUT (desktop) ----------
+   The 3D Tamagotchi flies down the page on a fixed path. Where it's on the LEFT, that section's content sits
+   in the right lane (--lane-start onwards); elsewhere content stays out of its way. */
+@media (min-width: 861px){
+  :root{--lane-start:44%;}
+  .panel--split .panel__text{max-width:500px;}
+
+  .banner{max-width:var(--maxw); margin:0 auto; text-align:left;}
+  .banner > *, .banner .eyebrow{margin-left:var(--lane-start); text-align:left;}
+
+  #why > *{margin-left:var(--lane-start);}
+  #why .stat-grid{grid-template-columns:repeat(2, 1fr);}
+
+  #how .panel__head--center{margin:0 0 64px; text-align:left;}
+
+  .panel--center{text-align:left;}
+  .panel--center > *{margin-left:var(--lane-start);}
+  .panel--center .panel__sub{margin:0 0 50px var(--lane-start);}
+  .who__grid{grid-template-columns:1fr;}
+
+  #faq{max-width:var(--maxw);}
+  #faq > *{margin-left:var(--lane-start);}
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 860px){
+  :root{--section-pad:96px;}
+  .nav__links, .nav__actions{display:none;}
+  .nav__burger{display:block;}
+  .panel--split{grid-template-columns:1fr;}
+  .panel--split .placeholder{order:-1;}
+  .how__row, .how__row--rev{grid-template-columns:1fr;}
+  .how__row--rev .placeholder{order:-1;}
+  .stat-grid{grid-template-columns:repeat(2, 1fr);}
+  .who__grid{grid-template-columns:1fr;}
+  .footer__in{grid-template-columns:repeat(2, 1fr);}
+  .hero{padding:min(46vh, 420px) 24px 56px; min-height:88vh;}
+}

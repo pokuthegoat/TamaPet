@@ -1,0 +1,235 @@
+TAMAPAD — PROJECT HANDOFF
+Written 2026-10-16. Read this fully before touching anything.
+
+================================================================
+1. WHAT THIS PROJECT IS
+================================================================
+
+"Crypto tek" — a website built specifically to get tokenised. The premise:
+the better the narrative/story the site tells, the more people trade the
+token built around it. This site is the narrative layer for a Tamagotchi-
+style pet game called TamaPad.
+
+CORE CONCEPT:
+- User adopts a virtual pet (picks an animal).
+- Raises it by interacting with it: feeding, bathing, minigames — all give XP.
+- In-game currency is earned by completing quests (milestones with your pet).
+- Currency buys clothes/items for the pet (exact details still TBD).
+- Possible later features: spin the wheel, daily rewards.
+
+THE HOOK (this is the whole point of the project):
+- You can tokenise your pet — launch a coin for it via pump.fun.
+- One pet = one coin. NOT one site-wide coin. Every owner launches their
+  own coin for their own pet. Tokenomics are per-pet, not platform-wide.
+- Trading fees from that coin go to a charity the pet's owner (the
+  launcher) picks. Funds sit in escrow (mechanism not yet designed).
+- Marketing angle / tagline logic: "every level you progress with your
+  pet, a real one is saved in real life."
+
+BUILD ORDER:
+1. Landing / marketing page first (this is what's been built so far).
+2. The actual game later. Nothing game-related has been built yet —
+   only the marketing landing page.
+
+================================================================
+2. HOW TO WORK WITH THIS USER — READ THIS CAREFULLY
+================================================================
+
+These are standing rules the user set explicitly. Breaking them has
+caused friction before. Follow them without being reminded:
+
+- "dnc" anywhere in a message = do absolutely nothing. No code, no
+  revert, no changes of any kind.
+- Keep messages short, simple, easy words. Speed is life — be quick,
+  don't over-explain.
+- NEVER write code or make a change without the user explicitly telling
+  you to. Mentioning "we'll work on X today" or discussing a feature is
+  NOT permission to start building it. Wait for a direct instruction.
+- Before saying any visual/animation change is done, actually verify it
+  rendered correctly (screenshot or browser check). Don't assume CSS
+  logic is correct just because it looks right in your head.
+- While coding: self-review constantly, not just at the end.
+- Whenever work seems done: review it and run checks before calling it
+  done — don't just claim success.
+- Keep a running project-notes file (project-notes.md in this repo),
+  updated after every important decision or exchange — not just when
+  asked. This has already been set up and used throughout.
+
+The user got visibly frustrated once when I said "building now" during
+a discussion that wasn't yet a direct go-ahead — treat any ambiguity as
+"ask or wait," not "proceed."
+
+================================================================
+3. WHERE THE FILES ARE / HOW TO RUN IT
+================================================================
+
+Project root: D:\TamaPad  (plain static site — no build step, no
+framework, no package.json. Just HTML/CSS/JS.)
+
+Files:
+- index.html       — all page markup/content
+- styles.css        — all styling
+- script.js         — FAQ accordion + mobile nav toggle (small, vanilla JS)
+- assets/hero.png   — the current hero background image (user-provided)
+- project-notes.md  — full running decision log, more granular than this file
+- HANDOFF.txt       — this file
+
+To preview locally: run `python3 -m http.server 8080` from D:\TamaPad,
+then open http://localhost:8080/. (This was running in background during
+the prior session — may need restarting in a new one.)
+
+No git repo exists yet. No package manager, no dependencies.
+
+================================================================
+4. LANDING PAGE STRUCTURE (as specified by the user)
+================================================================
+
+In this order, on the single index.html page:
+1. Navbar
+2. Hero section
+3. "What is TamaPad?" — explains: it's a launchpad/game, adopt a pet,
+   raise it, play/feed it, tokenise your animal, save it in real life.
+4. "Raise a pet, save a life" — standalone statement/banner section.
+5. "Why is it built?" — all coin trading fees go to the biggest animal
+   charity in the world; leveling up your pet = saving a real life.
+6. "How it works" — 3 rows, alternating layout:
+     Text left / image right
+     Image left / text right
+     Text left / image right
+7. "Who's it for" — built for people who want to save lives.
+8. FAQ (accordion, working).
+9. Footer.
+
+All 9 sections exist in index.html right now with real placeholder-free
+TEXT content. Visuals are a different story (see below).
+
+================================================================
+5. VISUAL DESIGN — HISTORY, DO NOT REPEAT THESE MISTAKES
+================================================================
+
+ATTEMPT 1 (REJECTED): Copied https://www.browserbase.com/ literally —
+their exact orange/black palette, pixel-dither illustrations, Space
+Grotesk/Inter/JetBrains Mono fonts, pill buttons, stat-tile grids, giant
+watermark footer. User's reaction: "this is bad... every single thing."
+The core problem: it copied a cold B2B SaaS dev-tool aesthetic onto a
+cute pet-charity-crypto concept. Tone mismatch. Also had no real pet
+depicted anywhere, lazy emoji icons, and felt like "Browserbase with pet
+words pasted in" rather than its own thing.
+
+CURRENT STATE (per explicit user instruction): ALL of that design was
+scrapped. The user said: "scrap every single piece of design so the only
+thing that is left is the layout and text, for images and illustrations
+use placeholders." This was executed literally:
+- System font stack only (no custom fonts).
+- Black / white / grey only. No color palette.
+- Plain 1px bordered buttons, no rounded pills, no shadows, no
+  decorative effects.
+- Every image/illustration/icon slot = a plain dashed-border grey box
+  reading "[ IMAGE PLACEHOLDER ]" (or "[ ICON ]" for the small ones).
+- Layout (grid/flex structure, spacing, section order, responsive
+  breakpoints) was KEPT — that part was fine, only the decoration was
+  wrong.
+
+DO NOT reintroduce colors, custom fonts, or an illustration style
+without new, explicit direction from the user. The visual identity is
+currently an open question and should stay minimal/placeholder until
+the user says otherwise.
+
+================================================================
+6. THE HERO SECTION — CURRENT STATE (the only section with real visual
+   treatment beyond plain placeholders)
+================================================================
+
+The hero went through several iterations in one session:
+
+a) Originally: centered text, plain grey placeholder box below it for
+   where a pet illustration would go.
+
+b) User asked for layout thinking: recommended either a centered-stack
+   layout or a full-bleed cinematic treatment. User picked full-bleed.
+
+c) User supplied a real image (not AI-generated by me — I don't have
+   image-gen tools in this environment) via a local file path and said
+   "use this image for the hero." It's a cyanotype-style (deep blue,
+   etching/engraving look) landscape photo/illustration — NOT a pet
+   image. Deliberately atmospheric/moody, not literal. Saved to
+   D:\TamaPad\assets\hero.png. This image was swapped once already
+   (mountain range → valley with a winding river) using the same
+   filename/path — if the user gives another image, just overwrite
+   assets/hero.png the same way (cp to that exact path), and be aware
+   the browser aggressively caches images by URL — a page-level
+   cache-busting query string is NOT enough; you need a hard reload
+   (ctrl+shift+r) when verifying the swap in-browser.
+
+d) Full-bleed treatment built: background-image covers the whole hero
+   section (min-height:92vh), with a dark linear-gradient overlay on
+   top for text legibility, white text.
+
+e) User said "now make it cinematic." I interpreted this as motion —
+   added a Ken Burns slow-zoom animation on the background, letterbox
+   bars (black bars top/bottom like widescreen film), and staggered
+   fade-up entrance animations on the text. User said "revert"
+   immediately. IMPORTANT LESSON: when THIS user says "cinematic," they
+   mean layout/composition, NOT animation or motion effects. Don't
+   default to adding motion for this kind of request again.
+
+f) User then clarified directly: "when i said 'make it cinematic' i
+   wanted you to change the LAYOUT of the hero, to make it look
+   better." I proposed three options: (1) lower-third/bottom-left text
+   placement like a movie poster, (2) static letterbox bars, (3) both
+   combined. User said "dont do 2" — so only #1 was built.
+
+CURRENT HERO LAYOUT (as it stands now):
+- Full-bleed background image (assets/hero.png), min-height:92vh.
+- Text block (eyebrow "01 / ADOPT", headline "Raise a pet. Save a life.",
+  subtext, two buttons) is anchored BOTTOM-LEFT, not centered.
+- Gradient overlay is weighted toward the bottom (darker near the text,
+  lighter near the top) so the image breathes at the top and text stays
+  legible at the bottom — classic movie-poster composition.
+- NO letterbox bars. NO animation/motion of any kind. This was explicit.
+- Verified working on both desktop and mobile (390px width) before
+  being called done.
+
+Do not reintroduce letterbox bars or motion/animation on the hero
+without new explicit direction — both were explicitly rejected.
+
+================================================================
+7. STILL PLACEHOLDER / NOT YET DONE
+================================================================
+
+- The "what is TamaPad" pet-stat-card visual: plain placeholder box.
+- All 3 "how it works" row images: plain placeholder boxes.
+- All 3 "who's it for" icons: plain placeholder boxes (labeled "[ ICON ]").
+- No real pump.fun contract address exists anywhere on the site (none
+  exists yet in reality — correctly left out, don't fabricate one).
+- Everything outside the hero still has zero visual design — just
+  layout, borders, and text, per section 5 above.
+
+================================================================
+8. OPEN PRODUCT QUESTIONS (not yet decided, don't assume answers)
+================================================================
+
+- Exact clothes/items details for pets.
+- Charity escrow mechanism — who actually holds the funds, how it's
+  verified/audited, what happens if a pet owner tries to rug.
+- Exact minigame list — none specified yet.
+- Overall visual identity/brand direction beyond "not Browserbase,"
+  plain-for-now, and the hero's poster-style photo treatment.
+
+================================================================
+9. NAVBAR NOTE
+================================================================
+
+Original instruction was to copy the navbar structure/style from
+https://www.idlenet.app/ (sticky header, logo left, links, CA pill,
+dark CTA button, Geist Mono font). That was BEFORE the full
+Browserbase-inspired redesign (which then got scrapped). The navbar in
+the current stripped-down build is plain (system font, no color,
+bordered buttons) like everything else — the idlenet.app visual
+reference was never actually carried through to the final stripped
+state. Worth asking the user whether they still want that specific
+navbar styling once real visual design work resumes.
+
+================================================================
+END OF HANDOFF
+================================================================

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TamaPet — Raise a pet. Save a life.</title>
+<meta name="description" content="TamaPet is a pet game. Adopt a pet, raise it, level it up — and every level you progress with your pet saves a real animal in real life." />
+<link rel="icon" type="image/svg+xml" href="assets/logo/tamapet-icon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.css">
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+
+<div class="grain" aria-hidden="true"></div>
+<div class="orbs" aria-hidden="true">
+  <span class="orb orb--blue" style="--top:2%;  --left:62%; --size:780px; --depth:0.10; --drift:26s"></span>
+  <span class="orb orb--cream" style="--top:6%;  --left:-12%; --size:620px; --depth:0.18; --drift:31s"></span>
+  <span class="orb orb--blue" style="--top:19%; --left:-18%; --size:820px; --depth:0.08; --drift:34s"></span>
+  <span class="orb orb--cream" style="--top:27%; --left:58%; --size:560px; --depth:0.16; --drift:28s"></span>
+  <span class="orb orb--blue" style="--top:41%; --left:60%; --size:860px; --depth:0.12; --drift:37s"></span>
+  <span class="orb orb--blue" style="--top:52%; --left:-20%; --size:720px; --depth:0.06; --drift:29s"></span>
+  <span class="orb orb--cream" style="--top:63%; --left:20%; --size:600px; --depth:0.15; --drift:33s"></span>
+  <span class="orb orb--blue" style="--top:74%; --left:55%; --size:800px; --depth:0.09; --drift:27s"></span>
+  <span class="orb orb--blue" style="--top:86%; --left:-14%; --size:760px; --depth:0.13; --drift:35s"></span>
+</div>
+
+<canvas class="stage" id="stage" aria-hidden="true"></canvas>
+
+<div class="loader" id="loader" aria-hidden="true">
+  <span class="loader__pct" id="loaderPct">0%</span>
+</div>
+
+<header class="nav">
+  <div class="nav__in">
+    <a href="#top" class="nav__logo">
+      <img class="nav__logo-mark" src="assets/logo/tamapet-icon.svg" alt="" />
+      <span>TamaPet</span>
+    </a>
+    <nav class="nav__links">
+      <a href="#what-is">What is it</a>
+      <a href="#why">Why it's built</a>
+      <a href="#how">How it works</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="nav__actions">
+      <a href="play.html" class="btn btn--primary">
+        <span>Adopt your pet</span>
+        <span class="btn__icon">&rarr;</span>
+      </a>
+      <a href="https://x.com" class="nav__social" aria-label="TamaPet on X">X</a>
+    </div>
+    <button class="nav__burger" id="burger" aria-label="Open menu">Menu</button>
+  </div>
+  <div class="nav__mobile" id="mobileMenu">
+    <a href="#what-is">What is it</a>
+    <a href="#why">Why it's built</a>
+    <a href="#how">How it works</a>
+    <a href="#faq">FAQ</a>
+    <a href="play.html" class="btn btn--primary">
+      <span>Adopt your pet</span>
+      <span class="btn__icon">&rarr;</span>
+    </a>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero__copy">
+      <h1 class="hero__title">Raise a pet.<br>Save a life.</h1>
+      <p class="hero__sub">Adopt a pet and raise it — feed it, bathe it, play with it and level it up. Every level you progress with your pet, a real one gets saved.</p>
+    </div>
+    <div class="hero__actions">
+      <a href="play.html" class="btn btn--primary btn--lg">
+        <span>Adopt your pet</span>
+        <span class="btn__icon">&rarr;</span>
+      </a>
+      <a href="#what-is" class="btn btn--ghost btn--lg">What is TamaPet</a>
+    </div>
+  </section>
+
+  <!-- TRUST STRIP -->
+  <section class="strip">
+    <p>1 level in the game = 1 real animal saved</p>
+  </section>
+
+  <!-- WHAT IS TAMAPET -->
+  <section class="panel panel--split" id="what-is">
+    <div class="panel__text">
+      <p class="eyebrow">What is TamaPet</p>
+      <h2 class="h2">A pet that's yours to raise.</h2>
+      <p class="body-lg">Pick an animal and raise it. Feed it, bathe it and play minigames to level up your pet.</p>
+      <a href="#how" class="link-arrow">See how it works <span>&rarr;</span></a>
+    </div>
+    <div class="placeholder placeholder--card">[ IMAGE PLACEHOLDER — pet stat card ]</div>
+  </section>
+
+  <!-- RAISE A PET, SAVE A LIFE BANNER -->
+  <section class="banner">
+    <p class="eyebrow">The hook</p>
+    <h2 class="banner__title">One level. One real life saved.</h2>
+  </section>
+
+  <!-- WHY ITS BUILT -->
+  <section class="panel" id="why">
+    <div class="panel__head">
+      <p class="eyebrow">Why it's built</p>
+      <h2 class="h2">Built to save real animals.</h2>
+      <p class="body-lg">TamaPet isn't just a game. Every level you progress with your pet saves a real animal in real life. The more you play, the more lives you save.</p>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-tile">
+        <strong>1 : 1</strong>
+        <span>One level, one real life</span>
+      </div>
+      <div class="stat-tile">
+        <strong>XP</strong>
+        <span>Feed, bathe and play to level up</span>
+      </div>
+      <div class="stat-tile">
+        <strong>Quests</strong>
+        <span>Earn GamePoints for clothes and items</span>
+      </div>
+      <div class="stat-tile">
+        <strong>Daily</strong>
+        <span>Rewards and a prize wheel</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="panel" id="how">
+    <div class="panel__head panel__head--center">
+      <p class="eyebrow">How it works</p>
+      <h2 class="h2">From adoption to saving a life.</h2>
+    </div>
+
+    <div class="how__row">
+      <div class="how__text">
+        <span class="how__num">01</span>
+        <h3 class="h3">Adopt your pet</h3>
+        <p class="body">Pick an animal and give it a name. It's yours — nobody else's.</p>
+      </div>
+      <div class="placeholder placeholder--row">[ IMAGE PLACEHOLDER ]</div>
+    </div>
+
+    <div class="how__row how__row--rev">
+      <div class="placeholder placeholder--row">[ IMAGE PLACEHOLDER ]</div>
+      <div class="how__text">
+        <span class="how__num">02</span>
+        <h3 class="h3">Raise it</h3>
+        <p class="body">Feed it, bathe it and play minigames to earn XP. Complete quests for GamePoints and spend them on clothes and items.</p>
+      </div>
+    </div>
+
+    <div class="how__row">
+      <div class="how__text">
+        <span class="how__num">03</span>
+        <h3 class="h3">Level up, save a life</h3>
+        <p class="body">Every level your pet reaches saves a real animal in real life. Come back daily for rewards and a spin of the prize wheel. Want more? Tokenise your pet on pump.fun — the fees go to a charity you pick.</p>
+      </div>
+      <div class="placeholder placeholder--row">[ IMAGE PLACEHOLDER ]</div>
+    </div>
+  </section>
+
+  <!-- WHO ITS FOR -->
+  <section class="panel panel--center">
+    <p class="eyebrow">Who it's for</p>
+    <h2 class="h2">Built for people who want to save lives.</h2>
+    <p class="body-lg panel__sub">TamaPet is for pet lovers, gamers, and anyone who wants their playtime to save a real animal.</p>
+    <div class="who__grid">
+      <div class="who__card">
+        <svg class="pixel-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 0h2v1h-2zM7 0h2v1h-2zM2 1h3v1h-3zM7 1h3v1h-3zM2 2h3v1h-3zM7 2h3v1h-3zM0 3h2v1h-2zM10 3h2v1h-2zM0 4h3v1h-3zM9 4h3v1h-3zM0 5h3v1h-3zM4 5h4v1h-4zM9 5h3v1h-3zM3 6h6v1h-6zM2 7h8v1h-8zM2 8h8v1h-8zM2 9h8v1h-8zM3 10h2v1h-2zM7 10h2v1h-2z"/></svg>
+        <h3 class="h4">Pet lovers</h3>
+        <p class="body-sm">Raise a virtual pet and watch it grow — without the vet bills.</p>
+      </div>
+      <div class="who__card">
+        <svg class="pixel-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 0h6v1h-6zM1 1h10v1h-10zM1 2h2v1h-2zM9 2h2v1h-2zM0 3h3v1h-3zM9 3h3v1h-3zM0 4h5v1h-5zM7 4h5v1h-5zM0 5h5v1h-5zM7 5h5v1h-5zM0 6h5v1h-5zM7 6h5v1h-5zM0 7h5v1h-5zM7 7h5v1h-5zM0 8h5v1h-5zM7 8h5v1h-5zM1 9h4v1h-4zM7 9h4v1h-4zM1 10h10v1h-10zM3 11h6v1h-6z"/></svg>
+        <h3 class="h4">Traders</h3>
+        <p class="body-sm">Tokenise your pet on pump.fun whenever you want. One pet, one coin — the fees go to a charity you pick.</p>
+      </div>
+      <div class="who__card">
+        <svg class="pixel-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M1 1h3v1h-3zM8 1h3v1h-3zM0 2h5v1h-5zM7 2h5v1h-5zM0 3h12v1h-12zM0 4h12v1h-12zM0 5h12v1h-12zM1 6h10v1h-10zM2 7h8v1h-8zM3 8h6v1h-6zM4 9h4v1h-4zM5 10h2v1h-2z"/></svg>
+        <h3 class="h4">Charity-minded</h3>
+        <p class="body-sm">Every level you reach saves a real animal. Your playtime, real impact.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="panel panel--narrow" id="faq">
+    <p class="eyebrow">FAQ</p>
+    <h2 class="h2">Questions, answered.</h2>
+    <div class="faq__list">
+
+      <div class="faq__item">
+        <button class="faq__q">
+          <span>What is TamaPet?</span><span class="faq__toggle">+</span>
+        </button>
+        <div class="faq__a"><p>A Tamagotchi-style game: adopt a pet, raise it and level it up — and every level you progress with your pet saves a real animal in real life.</p></div>
+      </div>
+
+      <div class="faq__item">
+        <button class="faq__q">
+          <span>How do I level up?</span><span class="faq__toggle">+</span>
+        </button>
+        <div class="faq__a"><p>Feed it, bathe it and play minigames to earn XP. Complete quests for GamePoints to buy clothes and items, and come back daily for rewards and the prize wheel.</p></div>
+      </div>
+
+      <div class="faq__item">
+        <button class="faq__q">
+          <span>Can I tokenise my pet?</span><span class="faq__toggle">+</span>
+        </button>
+        <div class="faq__a"><p>Yes, whenever you want. Launch its own coin on pump.fun — one pet, one coin, owned by you.</p></div>
+      </div>
+
+      <div class="faq__item">
+        <button class="faq__q">
+          <span>Where do the trading fees go?</span><span class="faq__toggle">+</span>
+        </button>
+        <div class="faq__a"><p>To the animal charity you pick when you launch your pet's coin. Funds sit in escrow until they're released.</p></div>
+      </div>
+
+      <div class="faq__item">
+        <button class="faq__q">
+          <span>Is this financial advice?</span><span class="faq__toggle">+</span>
+        </button>
+        <div class="faq__a"><p>No. TamaPet is a game. Tokens are volatile and speculative — only play with what you can afford to lose.</p></div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="footer__in">
+    <div class="footer__col">
+      <p class="footer__head">Platform</p>
+      <a href="#what-is">What is it</a>
+      <a href="#how">How it works</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <div class="footer__col">
+      <p class="footer__head">Game</p>
+      <a href="play.html">Adopt</a>
+      <a href="#how">Quests</a>
+      <a href="#how">Shop</a>
+    </div>
+    <div class="footer__col">
+      <p class="footer__head">Company</p>
+      <a href="#why">Charity partners</a>
+      <a href="#faq">Contact</a>
+    </div>
+    <div class="footer__col">
+      <p class="footer__head">Social</p>
+      <a href="https://x.com">X / Twitter</a>
+    </div>
+  </div>
+  <p class="footer__legal">© 2026 TamaPet. Not financial advice. Tokens are volatile — play responsibly.</p>
+  <p class="footer__legal footer__credit">3D model based on <a href="https://sketchfab.com/3d-models/tamagotchi-pet-sailor-moon-7cfe1fae9b414f07bcc1d5719bdebf9b">“Tamagotchi (Pet Sailor Moon)”</a> by <a href="https://sketchfab.com/Aldemona">Aldemona</a>, licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> — recoloured and modified.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.min.js"></script>
+<script src="assets/gsap/gsap.min.js"></script>
+<script src="assets/gsap/ScrollTrigger.min.js"></script>
+<script src="assets/gsap/SplitText.min.js"></script>
+<script src="script.js"></script><script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module" src="three-scene.js"></script>
+</body>
+</html>
