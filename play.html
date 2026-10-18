@@ -64,6 +64,23 @@
   .chips{display:flex; gap:6px; margin-top:8px; font-size:12px;}
   .chips span{padding:2px 8px; border-radius:99px; background:rgba(239,227,211,.14);}
 
+  /* ---- leaderboard ---- */
+  .lb-modes{display:flex; gap:6px; margin-top:14px;}
+  .lb-modes button{flex:1; padding:8px 10px; border-radius:9px; font-size:13px; border:1px solid var(--line); background:rgba(255,255,255,.05);}
+  .lb-modes button.is-on{background:var(--cream); color:var(--navy); font-weight:700;}
+  .lb-modes select{flex:1; font:inherit; font-size:13px; padding:7px 8px; border-radius:9px; border:1px solid var(--line); background:rgba(255,255,255,.05); color:var(--cream);}
+  .lb-modes select option{color:#111;}
+  .lb{list-style:none; margin-top:12px; display:flex; flex-direction:column; gap:4px;}
+  .lb li{display:grid; grid-template-columns:30px 1fr auto; align-items:center; gap:10px; padding:9px 10px; border-radius:10px; font-size:14px;}
+  .lb li:nth-child(odd){background:rgba(255,255,255,.04);}
+  .lb li.me{background:rgba(239,227,211,.16); outline:1px solid rgba(239,227,211,.4);}
+  .lb .rk{font-weight:700; opacity:.75; text-align:center;}
+  .lb .rk.top{color:#ffd36b; opacity:1;}
+  .lb .who b{display:block; font-weight:500;}
+  .lb .who span{font-size:12px; opacity:.6;}
+  .lb .val{font-weight:700;}
+  .lb-note{margin-top:12px; font-size:13px; opacity:.7; text-align:center;}
+
   /* ---- daily spin ---- */
   .dot{width:8px; height:8px; border-radius:50%; background:#ffd36b; box-shadow:0 0 0 3px rgba(255,211,107,.25);}
   .dot[hidden]{display:none;}
@@ -130,6 +147,7 @@
   <button class="tab" id="questsTab" aria-expanded="false" aria-controls="questsPanel">Quests <span class="badge" id="questBadge">0/5</span></button>
   <button class="tab" id="spinTab" aria-expanded="false" aria-controls="spinPanel">Daily spin <span class="dot" id="spinDot" hidden title="Free spin ready"></span></button>
   <button class="tab" id="shopTab">Shop</button>
+  <button class="tab" id="lbTab" aria-expanded="false" aria-controls="lbPanel">Leaderboard</button>
   <span class="tp" title="TamaPoints"><span id="tpNav">0</span> TP</span>
   <div id="wallet-slot"></div>
   <a class="back" href="index.html">← Site</a>
@@ -165,6 +183,19 @@
     <span class="muted" id="questsReset"></span>
   </div>
   <ul class="quests" id="questList"></ul>
+</section>
+
+<section class="panel" id="lbPanel" hidden aria-label="Leaderboard">
+  <div class="row">
+    <h2>Leaderboard</h2>
+    <span class="muted">Top 50</span>
+  </div>
+  <div class="lb-modes">
+    <button id="lbSaved" class="is-on">Animals saved</button>
+    <select id="lbGame" aria-label="Minigame high scores"><option value="">Minigame scores…</option></select>
+  </div>
+  <ol class="lb" id="lbList"></ol>
+  <p class="lb-note" id="lbNote"></p>
 </section>
 
 <section class="panel" id="spinPanel" hidden aria-label="Daily spin">

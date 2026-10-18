@@ -2,6 +2,7 @@
 import { createDeviceView } from './device-view.js';
 import { createLcd } from './lcd.js';
 import { createGame, resetSave, SPIN_PRIZES } from './game.js';
+import { GAMES } from './games.js';
 import { ANIMALS } from './game-screens.js';
 import { CATALOGUE, findItem } from './shop.js';
 
@@ -74,7 +75,8 @@ const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls)
 
 let openPanel = null;
 let spinning = false, turned = 0; // daily spin wheel state (render() reads `spinning`)
-const tabs = { stats: [$('statsTab'), $('statsPanel')], quests: [$('questsTab'), $('questsPanel')], spin: [$('spinTab'), $('spinPanel')] };
+const tabs = { stats: [$('statsTab'), $('statsPanel')], quests: [$('questsTab'), $('questsPanel')], spin: [$('spinTab'), $('spinPanel')],
+  leaderboard: [$('lbTab'), $('lbPanel')] };
 function closePanels() {
   for (const [tab, panel] of Object.values(tabs)) { panel.hidden = true; tab.setAttribute('aria-expanded', 'false'); }
   openPanel = null;
@@ -83,7 +85,7 @@ for (const [key, [tab, panel]] of Object.entries(tabs)) {
   tab.addEventListener('click', () => {
     const wasOpen = openPanel === key;
     closePanels();
-    if (!wasOpen) { panel.hidden = false; tab.setAttribute('aria-expanded', 'true'); openPanel = key; render(true); }
+    if (!wasOpen) { panel.hidden = false; tab.setAttribute('aria-expanded', 'true'); openPanel = key; render(true); if (key === 'leaderboard') loadBoard(); }
   });
 }
 document.addEventListener('pointerdown', (e) => {
@@ -336,3 +338,39 @@ window.addEventListener('tamapet:wallet', (e) => onWallet(e.detail.address));
 if (window.tamapetWallet?.address) onWallet(window.tamapetWallet.address);
 // Leaving / hiding the page: send anything still waiting.
 document.addEventListener('visibilitychange', () => { if (document.hidden && cloud.on) { clearTimeout(cloud.timer); pushCloud(); } });
+
+// ---- leaderboard (api/leaderboard.js: public top 50 from the cloud saves) ----
+// The local test server has no /api, so it reads the live site's (public data).
+const API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'https://tamapet-alpha.vercel.app' : '';
+const lb = { game: '' };
+GAMES.forEach((gm) => $('lbGame').append(new Option(title(gm.name), gm.name)));
+$('lbSaved').addEventListener('click', () => { lb.game = ''; $('lbGame').value = ''; loadBoard(); });
+$('lbGame').addEventListener('change', (e) => { lb.game = e.target.value; loadBoard(); });
+
+async function loadBoard() {
+  const game = lb.game;
+  $('lbSaved').classList.toggle('is-on', !game);
+  $('lbNote').textContent = 'Loading…';
+  let rows;
+  try {
+    const r = await fetch(`${API}/api/leaderboard${game ? `?game=${game}` : ''}`);
+    if (!r.ok) throw new Error(r.status);
+    rows = (await r.json()).rows;
+  } catch {
+    $('lbList').replaceChildren();
+    $('lbNote').textContent = 'Leaderboard unavailable right now.';
+    return;
+  }
+  if (game !== lb.game) return; // switched while loading
+  const me = window.tamapetWallet?.address;
+  $('lbList').replaceChildren(...rows.map((p, n) => {
+    const li = el('li', p.wallet && p.wallet === me ? 'me' : '');
+    const who = el('div', 'who');
+    const animal = p.animal != null && ANIMALS[p.animal] ? title(ANIMALS[p.animal].name) : 'Pet';
+    const wallet = p.wallet ? `${p.wallet.slice(0, 4)}…${p.wallet.slice(-4)}` : '';
+    who.append(el('b', '', p.name), el('span', '', [animal, wallet].filter(Boolean).join(' · ')));
+    li.append(el('span', 'rk' + (n < 3 ? ' top' : ''), n + 1), who, el('span', 'val', game ? p.value : `${p.value} saved`));
+    return li;
+  }));
+  $('lbNote').textContent = rows.length ? (me ? '' : 'Connect your wallet to get on the board.') : 'No scores yet — be the first!';
+}
