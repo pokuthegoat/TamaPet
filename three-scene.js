@@ -77,6 +77,7 @@ const PATH = [
   { el: '.how__row .placeholder', i: 0,  box: true },
   { el: '.how__row .placeholder', i: 1,  box: true, arc: true },
   { el: '.how__row .placeholder', i: 2,  box: true, arc: true },
+  { el: '.counter',          f: 0.5,    x: -0.3 },  // live counter: the device rests on the left, number on the right
   { el: '.panel--center .h2', f: 0.5,    x: -0.29, spin: true },
   { el: '.footer',            f: 0.5,    x: -0.24, y: 0.1, s: 0.9 },
 ];
