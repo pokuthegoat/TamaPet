@@ -567,3 +567,4 @@ Open threads, in priority-ish order:
 - Client: wallet.js exposes window.tamapetWallet.getToken(); game.js createGame({ onSave }) + data()/hasPet()/setData(); play.js: on connect GET → cloud save replaces local (toast "loaded … from your wallet"), or if none, uploads the local pet; afterwards every change POSTs (debounced 1.5 s, flush on hide).
 - Vercel needs env vars: PRIVY_APP_ID, PRIVY_APP_SECRET, SUPABASE_URL, SUPABASE_SECRET_KEY (values in .env.local).
 - Live (2026-10-18): user added the 4 env vars in Vercel; needed a redeploy (empty commit) to take effect. Verified: live /play with the user's connected wallet → GET /api/save 200 (real Privy token verified + Supabase read). No pet on the live domain yet, so nothing uploaded; POST path to be confirmed once the user creates/plays a pet there.
+- Confirmed end-to-end: user made pet "TEST" (cat) on live /play → row in public.saves with wallet AtC9…dzQE (looked up via Privy server-side). POST path works.
