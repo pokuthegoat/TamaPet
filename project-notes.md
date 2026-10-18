@@ -547,3 +547,15 @@ Open threads, in priority-ish order:
 - User supplied their own logo: D:\Downloads\6d9827ca-…png — blue pixel-cat outline (smile, square eyes) with a "+" sparkle (copied to assets/logo/tamapet-logo-source.png). My 3 generated options (A/B/C) were rejected and deleted.
 - Traced into exact vectors (41 rects, colour #034FED): `assets/logo/tamapet-logo.svg` (transparent) and `assets/logo/tamapet-icon.svg` (cream rounded square + blue cat) — the icon replaces the "T" in the landing + /play navbars and is the browser-tab icon (index, play, debug).
 - NOT changed (ask first): the cream "T" badge on the front of the 3D device.
+
+## GitHub + Vercel (2026-10-18)
+- Repo: https://github.com/pokuthegoat/TamaPet (branch main). Everything pushed except server.log (.gitignore). vercel.json has `cleanUrls: true` → play.html is served at /play (play.html redirects there), so no link changes were needed.
+- User wants it simple: make repo, push everything, host on Vercel. Don't overthink deploy steps.
+
+## Connect wallet (Privy) (2026-10-18)
+- Wallet-only login (Solana: Phantom, Solflare, Backpack + detected wallets), button in BOTH navbars (landing next to "Adopt your pet", /play next to "← Site").
+- Source: wallet/main.jsx (React + @privy-io/react-auth) → built with `npm run build:wallet` (wallet/vite.config.js) into ONE committed static file /wallet.js (~5.7 MB minified, loads async, doesn't block the page). Vercel stays a plain static host — no build step there. Rebuild + commit wallet.js after changing wallet/main.jsx.
+- config.js holds the public Privy App ID. The app SECRET is in .env.local (git-ignored) — never commit it / never write it in these notes.
+- Solana peer deps pinned to a matching set: @solana/kit ^5, @solana-program/memo 0.10.0, system ^0.10, token ^0.9 (newer memo needs kit 8 → conflict).
+- Connected state: shortened address + green dot, menu Copy address / Disconnect. Fires `tamapet:wallet` events + window.tamapetWallet.address for the cloud save later.
+- Verified: button on both pages, Privy login modal opens with the Solana wallet list, no errors. Actual wallet connection to be tested by the user. User must add localhost:8080 + the Vercel domain to Privy allowed domains.
