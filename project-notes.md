@@ -574,3 +574,7 @@ Open threads, in priority-ish order:
 ## Live counter (2026-10-18)
 - Landing: new section `.counter` between How it works and Who it's for — green "Live" dot, big number = real animals saved by all players (sum of `saved` over cloud saves, api/stats.js, public + edge-cached 10 s), "real animals saved by TamaPet players, and counting." Counts up when scrolled into view, re-polls every 15 s (local test server reads the live API). Right lane on desktop.
 - 3D path: added a stop `{ el: '.counter', f: .5, x: -.3 }` so the device finishes crossing before the counter and rests on its left (it was crossing right over the number). Don't give the counter the class panel--center (the Who-it's-for path anchor uses `.panel--center .h2`).
+
+## Launching your pet — DROPPED (2026-10-18)
+- User decided not to build pet-coin launching ("seems like a lot of work"). Research kept for reference: pump.fun creator fee sharing (Jan 2026) lets the creator assign up to 10 fee recipients (could be 100% to a charity), payout instruction distribute_creator_fees_v2 is permissionless; set after launch (2nd signature). Operation Kindness Giving Block SOL address the user generated: GUEAn5QX63jihkPb3ojN2A8e8tpXZbAjLB2QWnMaowyw (reusable). Polar Bears International also takes SOL via The Giving Block.
+- The site still mentions tokenising (How it works step 03 line, "Traders" card, 2 FAQ items) — asked the user whether to remove.
