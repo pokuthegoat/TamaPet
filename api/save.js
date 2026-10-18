@@ -1,6 +1,8 @@
 // /api/save — the player's cloud save, tied to their Privy (wallet) login.
 //   GET  → { data } (null if this wallet has no save yet)
-//   POST { data } → stores it (whole save object from game.js), returns { ok, updatedAt }
+//   POST { data, base } → stores it (whole save object from game.js), returns { ok, updatedAt }.
+//     `base` = the updatedAt this save started from. If the cloud has a different (newer) version — another tab or
+//     device saved meanwhile — nothing is written: 409 { error, data, updatedAt } so the page loads that instead.
 import { verifyPrivy, privyWallet, db, send } from './_lib.js';
 
 const MAX_BYTES = 64 * 1024; // a save is ~2 KB; anything far bigger isn't a real save
@@ -15,6 +17,7 @@ function check(data) {
   if (!int(data.tp ?? 0, 0, 100000000)) return 'Bad TamaPoints';
   if (!int(data.saved ?? 0, 0, 100000)) return 'Bad saved count';
   if (data.name != null && (typeof data.name !== 'string' || !/^[A-Z0-9]{0,8}$/.test(data.name))) return 'Bad name';
+  if (data.animal == null) return 'No pet in this save'; // an empty game never replaces a real pet
   return null;
 }
 
@@ -31,6 +34,10 @@ export default async function handler(req, res) {
       const data = body?.data;
       const bad = check(data);
       if (bad) return send(res, 400, { error: bad });
+      const current = (await db(`saves?user_id=eq.${encodeURIComponent(userId)}&select=data,updated_at`))[0];
+      if (current && (!body.base || Date.parse(body.base) !== Date.parse(current.updated_at))) {
+        return send(res, 409, { error: 'Newer save in the cloud', data: current.data, updatedAt: current.updated_at });
+      }
       const wallet = await privyWallet(userId);
       const rows = await db('saves?on_conflict=user_id', {
         method: 'POST',

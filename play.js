@@ -9,7 +9,7 @@ import { CATALOGUE, findItem } from './shop.js';
 if (new URLSearchParams(location.search).has('reset')) resetSave();
 
 // cloud save state (used by the game's onSave from the start; the rest is at the bottom)
-const cloud = { on: false, wallet: null, timer: 0, busy: false, again: false };
+const cloud = { on: false, wallet: null, timer: 0, busy: false, again: false, base: null }; // base = cloud version we're on
 const game = createGame({ onSave: () => queueCloud() });
 const lcd = createLcd();
 const hint = document.getElementById('hint');
@@ -296,6 +296,7 @@ async function cloudApi(method, body) {
     body: body ? JSON.stringify(body) : undefined,
   });
   const out = await r.json().catch(() => ({}));
+  if (r.status === 409) return { conflict: true, ...out };
   if (!r.ok) throw new Error(out.error || `HTTP ${r.status}`);
   return out;
 }
@@ -305,10 +306,18 @@ function queueCloud(delay = 1500) {
   cloud.timer = setTimeout(pushCloud, delay);
 }
 async function pushCloud() {
-  if (!cloud.on) return;
+  if (!cloud.on || !game.hasPet()) return; // never upload a game without a pet
   if (cloud.busy) { cloud.again = true; return; }
   cloud.busy = true;
-  try { await cloudApi('POST', { data: game.data() }); } catch (e) { console.warn('[TamaPet] cloud save failed:', e.message); }
+  try {
+    const out = await cloudApi('POST', { data: game.data(), base: cloud.base });
+    if (out.conflict) { // another tab / device saved newer progress: take that instead of overwriting it
+      cloud.base = out.updatedAt;
+      game.setData(out.data);
+      toast({ type: 'cloud', text: 'loaded newer progress from another tab or device' });
+      render(true);
+    } else cloud.base = out.updatedAt;
+  } catch (e) { console.warn('[TamaPet] cloud save failed:', e.message); }
   cloud.busy = false;
   if (cloud.again) { cloud.again = false; queueCloud(); }
 }
@@ -319,15 +328,17 @@ async function onWallet(address) {
   clearTimeout(cloud.timer);
   if (!address) return;
   try {
-    const { data } = await cloudApi('GET');
+    const { data, updatedAt } = await cloudApi('GET');
     if (cloud.wallet !== address) return; // switched wallets meanwhile
     cloud.on = true;
-    if (data) {
+    cloud.base = updatedAt;
+    if (data && data.animal != null) {
       game.setData(data);
       toast({ type: 'cloud', text: `loaded ${data.name || 'your pet'} from your wallet` });
     } else if (game.hasPet()) {
-      await cloudApi('POST', { data: game.data() });
-      toast({ type: 'cloud', text: 'your pet is now saved to your wallet' });
+      const out = await cloudApi('POST', { data: game.data(), base: null });
+      if (out.conflict) { cloud.base = out.updatedAt; game.setData(out.data); }
+      else { cloud.base = out.updatedAt; toast({ type: 'cloud', text: 'your pet is now saved to your wallet' }); }
     }
     render(true);
   } catch (e) {
