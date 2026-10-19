@@ -9,6 +9,9 @@ const heroCopy = hero.querySelector('.hero__copy');
 const loader = document.getElementById('loader');
 const loaderPct = document.getElementById('loaderPct');
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+window.__tamaScene = true; // tells script.js's loader safety net that the 3D started
+// The model is served compressed without a size, so the download progress has no total: use the file's size.
+const MODEL_BYTES = 15048884;
 
 function hideLoader() {
   loader.classList.add('is-done');
@@ -511,7 +514,7 @@ new GLTFLoader().load(
     start();
   },
   (e) => {
-    if (e.total) loaderPct.textContent = Math.round((e.loaded / e.total) * 100) + '%';
+    loaderPct.textContent = Math.min(99, Math.round((e.loaded / (e.total || MODEL_BYTES)) * 100)) + '%';
   },
   (err) => {
     console.error('[TamaPet] model failed to load', err);

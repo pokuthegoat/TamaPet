@@ -5,6 +5,12 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 window.scrollTo(0, 0);
 window.addEventListener('pagehide', () => window.scrollTo(0, 0));
 
+// Loader safety net: if the 3D scene never starts (its module failed to load), don't leave the loading screen up
+// forever — show the page without the device. (three-scene.js sets window.__tamaScene as soon as it runs.)
+const giveUpLoader = () => { const l = document.getElementById('loader'); if (l && !window.__tamaScene) l.classList.add('is-done'); };
+window.addEventListener('error', giveUpLoader); // e.g. a module that can't load / resolve — shows up right away
+setTimeout(giveUpLoader, 20000);                // otherwise: a slow phone gets 20 s before we stop waiting
+
 // Mobile nav toggle
 const burger = document.getElementById('burger');
 const mobileMenu = document.getElementById('mobileMenu');

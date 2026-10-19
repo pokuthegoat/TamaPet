@@ -291,8 +291,8 @@
 <script src="assets/gsap/ScrollTrigger.min.js"></script>
 <script src="assets/gsap/SplitText.min.js"></script>
 <script src="config.js"></script>
-<script type="module" src="wallet.js"></script>
-<script src="script.js"></script><script type="importmap">
+<!-- the import map must come before ANY module script (Safari ignores a later one → the 3D never starts) -->
+<script type="importmap">
 {
   "imports": {
     "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
@@ -300,6 +300,8 @@
   }
 }
 </script>
+<script type="module" src="wallet.js"></script>
+<script src="script.js"></script>
 <script type="module" src="three-scene.js"></script>
 </body>
 </html>
