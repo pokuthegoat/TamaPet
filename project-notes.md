@@ -14,13 +14,37 @@ Running log of decisions and open items. Updated as things are shared/decided.
 - Check 3D changes from more than one angle (front AND side) before calling them done.
 - Desktop only — user doesn't care about mobile; don't propose mobile work.
 
-## ▶ START HERE — state at end of session 2026-10-18
+## ▶ START HERE — state at end of session 2026-10-19
 
-### FIRST THING NEXT SESSION: build the launch video from the storyboard
-- Storyboard approved-ish (user went offline right after seeing it): `ad-kit/storyboard/storyboard.png` (8 frames, 9:16, ~20.5 s). Scenes: 01 Boot-up (black, one glowing LCD pixel, types "> booting tamapet_", zoom punch) · 02 Reveal (whip zoom out, 3D device spins in with motion blur, rim-light sweep, masked "Meet your new pet.") · 03 Pick a pet (LCD close-up cat→dog→polar bear in hard steps, typed text, ● press ring) · 04 Care (orbit, real feed→bath animation, "+10 XP" flies at camera) · 05 Play (0.5 s cuts of real Snake/Flap/Space/Blocks/Pong/Racer, zoom punch + flash, "10 retro games") · 06 Make it yours (spin, shell swaps blue→pink(rainbow pet)→gold→mint→black on the beat, light sweep) · 07 Mission ("LEVEL UP!", push-in, glowing "+1 SAVED", pixel sparks, "Every level / saves a real animal.") · 08 End card (device blurred back, pixel-cat logo builds in with glow, "TamaPet" types, tagline, tamapet-alpha.vercel.app/play, @UseTamaPet).
-- User's style brief: very quick and swift, smooth After-Effects feel, nice glows and zooms, everything shown with ORIGINAL animations (live 3D, real LCD games) and TYPING animations. The first attempt (ad-kit/ad.html → TamaPet-ad-*.mp4, still images + simple pop-ins) was "pretty bad" — don't reuse its approach.
-- Plan: animate the LIVE 3D device (three.js, camera moves/orbits/push-ins, shell colour swaps via setShell) + live LCD content (game-screens / games.js) + GSAP timeline with glows/zooms/typing, then render frame by frame to MP4 like ad-kit/render.mjs (headless Chrome + ad-kit/tools ffmpeg-static). 9:16 first, then 16:9. No music (user adds). Avoid full-size CSS mix-blend/grain overlay layers in headless capture (froze screenshots) — do grain in canvas/WebGL instead.
-- Ad tooling (all git-ignored): ad-kit/ (images, logos, PROMPT.md, README.md, ad.html, render.mjs, tools/ffmpeg), adkit-render.html + adkit-capture.mjs (posed 3D renders: `node adkit-capture.mjs` / `sb` / `sb sheet`). Claude Motion is Team/Enterprise only — user can't use it.
+### Launch video — DONE (both formats + sound effects)
+Deliverables, all in `ad-kit/` (git-ignored):
+- `TamaPet-launch-vertical.mp4` (1080×1920) · `TamaPet-launch-horizontal.mp4` (1920×1080) — 20.5 s, silent.
+- `TamaPet-launch-vertical-sfx.mp4` · `TamaPet-launch-horizontal-sfx.mp4` — same, with sound effects.
+- `TamaPet-launch-portrait.mp4` / `-portrait-sfx.mp4` — 4:5, 1122×1402 (user request): the 9:16 layout scaled to fit and centred (`?f=p`, `.box` + camera setViewOffset; trims ~4.4% top/bottom), background fills the sides. `node render-launch.mjs p`.
+- "+10 XP" blurred trailing copy REMOVED (looked like a dirty shadow) — fixed in vertical + portrait; the HORIZONTAL video still has it (offered a short re-render, no answer).
+- `TamaPet-launch-sfx.wav` — the sound effects alone (48 kHz stereo, −18 LUFS, room left for music) for the user's editor.
+- Backups of earlier vertical versions: `TamaPet-launch-vertical-before-{pickfix,spinfix,glowfix}.mp4`.
+- The user will fix the games section (05) themselves in a video editor and add music themselves.
+
+How it's built:
+- `ad-kit/launch.html`: one page, everything a function of time (`seek(t)`), 8 scenes matched to the storyboard FRAMES. Live 3D device (own three.js scene + bloom), real LCD screens + real minigames re-simulated per frame (seeded Math.random, scripted presses, auto-picks a seed that survives the clip), one paused GSAP timeline with AE-style CustomEases (`ae`, `aeOut`, `aeIn`, `whip`). `?t=3.2` = that moment, `?play` = live preview, `?f=h` = 16:9.
+- `ad-kit/render-launch.mjs`: `node render-launch.mjs v|h|both` (full render ≈22 min per format; real motion blur = 4 sub-frames per frame, 180° shutter, ffmpeg tmix) · `stills v 1.2,3.4` → ad-kit/stills/*.png · `range v 3.0 6.0` → stills/segment-v.mp4 to splice in (ffmpeg trim/concat, re-encode crf 15) so a fix doesn't need a full re-render.
+- `ad-kit/stills/compare.mjs <t per scene>` → compare.png (storyboard frame next to the render).
+- `ad-kit/sfx.mjs`: `node sfx.mjs` (seconds) → the WAV + both *-sfx.mp4. All sounds synthesised (no samples/licensing), cues on the timeline's exact times.
+- 16:9 has its own layout (no storyboard for it): `.wide` CSS + `V(vertical, wide)` camera values — device/card left, words right, end card centred.
+
+User decisions (2026-10-19):
+- v1 rejected: "didn't follow the storyboard in the slightest". Smoothness was fine — layout/content was wrong. Lesson: match the storyboard FRAMES (positions, sizes, elements), compare side by side BEFORE rendering.
+- Pick scene (03): no ring, no bounce on animal switches, no blank LCD frames, glow arrives with the card, "Cat." types as the card lands, caption "Cat. Dog. Bear." (screen itself still shows POLAR BEAR — offered to change, no answer), LCD 7% inner margin.
+- Reveal (02): must NEVER spin backwards; turn is one continuous curve (`revealYaw`). The moving point light was removed (it rendered differently depending on seek path → brightness pop at the splice).
+- End card: one pill **"tamapet.org"** (user dropped "Coming soon") + @UseTamaPet. Domain NOT bought yet, and there will be NO app (App Store line removed — don't mention an app again).
+- Sound: NO whooshes (also removed the soft air/sweep noise layers). Kept: 8-bit blips, typing ticks, coin dings, game blips, colour-swap pops, level-up jingle, chimes, hits on flashes/cuts, and 2 risers (1.5 s, 3.5 s — asked if those count as whooshes, no answer yet).
+
+Bugs found while building (fixed in launch.html):
+1. First LCD frame burned in as a faint ghost — three's texture-binding cache out of step when the LCD is copied in → `renderer.resetState()` before each copy. SAME BUG LIKELY IN /play (`lcd.js` attachLcd) — told the user, not touched.
+2. Scene background black after its canvas texture was resized post-upload → paint before first render (later moved the background to CSS anyway).
+3. Bloom pass wrote alpha → dark film over the CSS background on glow pulses → custom blending (bloom adds colour only).
+4. Tweens whose start values depend on render path (`.to` after `fromTo` with from-only props) → use explicit `fromTo` for anything that fades out.
 
 ### Run / deploy
 - Local: `python D:\TamaPad\serve.py` → http://localhost:8080/ (no-cache dev server). Game: /play.html (local) = /play (live).

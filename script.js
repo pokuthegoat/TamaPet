@@ -15,6 +15,31 @@ mobileMenu.querySelectorAll('a').forEach(a => {
   a.addEventListener('click', () => mobileMenu.classList.remove('is-open'));
 });
 
+// CA button in the navbar: hover shows the full contract address, click copies it.
+(function initCa() {
+  const btn = document.getElementById('caBtn');
+  if (!btn) return;
+  const hint = btn.querySelector('.nav__ca-hint');
+  let reset = 0;
+  btn.addEventListener('click', async () => {
+    const ca = btn.dataset.ca;
+    try {
+      await navigator.clipboard.writeText(ca);
+    } catch { // no clipboard API (e.g. not https): copy through a hidden text field
+      const ta = Object.assign(document.createElement('textarea'), { value: ca });
+      ta.style.cssText = 'position:fixed; opacity:0;';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+    hint.textContent = 'Copied!';
+    btn.classList.add('is-copied');
+    clearTimeout(reset);
+    reset = setTimeout(() => { hint.textContent = 'Click to copy'; btn.classList.remove('is-copied'); }, 1600);
+  });
+})();
+
 // FAQ accordion: animates the answer's real height (GSAP), so opening and closing are smooth and immediate.
 // Opening one closes the others. Without GSAP it falls back to an instant toggle.
 (function initFaq() {

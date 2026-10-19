@@ -169,6 +169,25 @@ body{position:relative;}
   font-size:13px; font-weight:600;
 }
 .nav__social img{width:100%; height:100%; display:block; border-radius:inherit; object-fit:cover;} /* X logo (assets/x-logo.jpg) */
+/* CA button: hover shows the full contract address below it, click copies it */
+.nav__ca{
+  position:relative; height:38px; padding:0 14px; border-radius:8px;
+  background:rgba(255,255,255,0.08); color:var(--white);
+  font-size:13px; font-weight:600; letter-spacing:0.06em;
+}
+.nav__ca:hover, .nav__ca:focus-visible{background:rgba(255,255,255,0.14);}
+.nav__ca-pop{
+  position:absolute; top:calc(100% + 10px); right:0;
+  display:flex; flex-direction:column; align-items:flex-end; gap:4px;
+  padding:10px 12px; border-radius:10px; white-space:nowrap;
+  background:rgba(11,57,134,0.94); border:1px solid var(--glass-border); backdrop-filter:blur(10px);
+  opacity:0; transform:translateY(-4px); pointer-events:none;
+  transition:opacity .18s ease, transform .18s ease;
+}
+.nav__ca:hover .nav__ca-pop, .nav__ca:focus-visible .nav__ca-pop{opacity:1; transform:none;}
+.nav__ca-addr{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:13px; font-weight:500; letter-spacing:0;}
+.nav__ca-hint{font-size:11px; font-weight:500; letter-spacing:0.02em; color:var(--white-faint);}
+.nav__ca.is-copied .nav__ca-hint{color:var(--cream);}
 .nav__burger{display:none; border:1px solid var(--glass-border); background:rgba(255,255,255,0.08); color:var(--white); padding:8px 14px; border-radius:8px; font-size:13px;}
 .nav__mobile{
   display:none; flex-direction:column; gap:16px;
