@@ -223,3 +223,38 @@ const lenis = (function initLenis() {
   load();
   setInterval(load, 15000);
 })();
+
+// Live fees counter: total creator fees the TamaPet coin has made, in USD (api/fees.js reads them from the chain).
+// Counts up smoothly to each new value; before launch the endpoint simply returns 0.
+(function initFeesCounter() {
+  const el = document.getElementById('feesCount');
+  if (!el) return;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const api = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'https://tamapet-alpha.vercel.app' : '';
+  const fmt = (n) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  let shown = 0, target = 0, seen = false, raf = 0;
+  const animate = () => {
+    cancelAnimationFrame(raf);
+    const from = shown, t0 = performance.now(), dur = reduceMotion ? 0 : 1400;
+    const step = (now) => {
+      const k = dur ? Math.min(1, (now - t0) / dur) : 1;
+      shown = from + (target - from) * (1 - Math.pow(1 - k, 3));
+      el.textContent = fmt(shown);
+      if (k < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  };
+  const load = async () => {
+    try {
+      const r = await fetch(`${api}/api/fees`, { cache: 'no-store' });
+      if (!r.ok) return; // keep the last number
+      const { usd } = await r.json();
+      if (typeof usd === 'number' && usd !== target) { target = usd; if (seen) animate(); }
+    } catch { /* offline: keep the last number */ }
+  };
+  new IntersectionObserver((entries) => {
+    if (entries.some((e) => e.isIntersecting) && !seen) { seen = true; animate(); }
+  }, { threshold: 0.4 }).observe(el);
+  load();
+  setInterval(load, 15000);
+})();

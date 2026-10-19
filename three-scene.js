@@ -74,10 +74,11 @@ const MODEL_HEIGHT = 1.9;
 const PATH = [
   { el: '.hero',                         x: 0.2,  y: -0.02, s: 1 },
   { el: '#why',               f: 0.45,   x: -0.3, spin: '.banner .eyebrow' },
+  { el: '#fees',              f: 0.5,    x: -0.3 },  // live fees: rests on the left, number on the right
   { el: '.how__row .placeholder', i: 0,  box: true },
   { el: '.how__row .placeholder', i: 1,  box: true, arc: true },
   { el: '.how__row .placeholder', i: 2,  box: true, arc: true },
-  { el: '.counter',          f: 0.5,    x: -0.3 },  // live counter: the device rests on the left, number on the right
+  { el: '.counter:not(#fees)', f: 0.5,  x: -0.3 },  // live animals counter: the device rests on the left, number on the right
   { el: '.panel--center .h2', f: 0.5,    x: -0.29, spin: true },
   { el: '.footer',            f: 0.5,    x: -0.24, y: 0.1, s: 0.9 },
 ];
