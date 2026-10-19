@@ -6,11 +6,12 @@ import { ANIMALS, ICONS, BOWL, BUBBLE, MENU, menuX, nameLines } from './game-scr
 import { GAMES } from './games.js';
 import { makeDay, today, text as questText, REWARD } from './quests.js';
 import { CATALOGUE, DEFAULTS, findItem } from './shop.js';
+import { xpToNext, stageOf } from './evolution.js';
 
 export const CONFIG = {
   xpFeed: 10,
   xpBath: 10,
-  xpToNext: (lv) => 40 + lv * 20,  // XP needed to go from level lv to lv + 1
+  xpToNext,                        // XP needed to go from level lv to lv + 1 (evolution.js)
   feedEvery: 20 * 60e3,            // ms before feeding gives XP again ("FULL" until then)
   bathEvery: 30 * 60e3,            // ms before a bath gives XP again ("CLEAN" until then)
   ready: 1500,                     // ms of "READY" before a minigame starts
@@ -65,6 +66,7 @@ export function createGame({ onSave } = {}) {
   // Adds XP; a new level (each level = one real animal saved) queues the level-up screen. `counts`: whether it
   // counts toward today's "earn N XP" quest (quest rewards don't).
   function addXp(n, counts = true) {
+    const stage = stageOf(d.level, d.xp);
     d.xp += n;
     let up = false;
     while (d.xp >= CONFIG.xpToNext(d.level)) {
@@ -74,6 +76,8 @@ export function createGame({ onSave } = {}) {
       up = true;
     }
     if (up && !g.queue.some((q) => q.type === 'levelup')) g.queue.push({ type: 'levelup' });
+    const grown = stageOf(d.level, d.xp);
+    if (grown !== stage) g.events.push({ type: 'evolve', text: `${d.name || 'your pet'} is now ${grown === 'Adult' ? 'an' : 'a'} ${grown}!` }); // shown by the page
     if (counts && n > 0) { quests().xpToday += n; questEvent('xp'); }
     save();
   }
@@ -356,7 +360,7 @@ export function createGame({ onSave } = {}) {
     const day = quests();
     return {
       name: d.name, animalId: d.animal, animal: d.animal == null ? '' : ANIMALS[d.animal].name, level: d.level, xp: d.xp,
-      xpNext: CONFIG.xpToNext(d.level), saved: d.saved, tp: d.tp,
+      xpNext: CONFIG.xpToNext(d.level), saved: d.saved, tp: d.tp, status: stageOf(d.level, d.xp),
       best: GAMES.map((gm) => ({ name: gm.name, best: d.best[gm.name] || 0 })),
       owned: { device: [...d.owned.device], pet: [...d.owned.pet] }, equipped: { ...d.equipped },
       quests: day.list.map((q) => ({ text: questText(q).split(' — ')[0], reward: REWARD[q.type], done: q.done,

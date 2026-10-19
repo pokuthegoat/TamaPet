@@ -120,7 +120,7 @@ function render(force = false) {
   $('questBadge').textContent = `${done}/${i.quests.length}`;
 
   $('petName').textContent = i.name || '—';
-  $('petLine').textContent = i.animal ? `${title(i.animal)} · Level ${i.level}` : 'No pet yet';
+  $('petLine').textContent = i.animal ? `${title(i.animal)} · Level ${i.level} · ${i.status}` : 'No pet yet';
   $('lvLabel').textContent = `Level ${i.level}`;
   $('xpLabel').textContent = `${i.xp} / ${i.xpNext} XP`;
   $('xpBar').style.width = `${Math.min(100, (i.xp / i.xpNext) * 100)}%`;
@@ -157,7 +157,7 @@ setInterval(render, 300);
 
 function toast(ev) {
   const t = el('div', 'toast');
-  t.append(el('b', '', { spin: 'Daily spin! ', shop: 'Bought! ', questdone: 'Quest done! ', cloud: 'Cloud save: ' }[ev.type] || ''), document.createTextNode(ev.text));
+  t.append(el('b', '', { spin: 'Daily spin! ', shop: 'Bought! ', questdone: 'Quest done! ', cloud: 'Cloud save: ', evolve: 'Evolved! ' }[ev.type] || ''), document.createTextNode(ev.text));
   $('toasts').append(t);
   setTimeout(() => t.remove(), 4100);
 }
@@ -381,7 +381,7 @@ async function loadBoard() {
     const who = el('div', 'who');
     const animal = p.animal != null && ANIMALS[p.animal] ? title(ANIMALS[p.animal].name) : 'Pet';
     const wallet = p.wallet ? `${p.wallet.slice(0, 4)}…${p.wallet.slice(-4)}` : '';
-    who.append(el('b', '', p.name), el('span', '', [animal, wallet].filter(Boolean).join(' · ')));
+    who.append(el('b', '', p.name), el('span', '', [animal, p.status, wallet].filter(Boolean).join(' · ')));
     li.append(el('span', 'rk' + (n < 3 ? ' top' : ''), n + 1), who, el('span', 'val', game ? p.value : `${p.value} saved`));
     return li;
   }));
