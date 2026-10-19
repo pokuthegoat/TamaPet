@@ -46,6 +46,13 @@ Bugs found while building (fixed in launch.html):
 3. Bloom pass wrote alpha → dark film over the CSS background on glow pulses → custom blending (bloom adds colour only).
 4. Tweens whose start values depend on render path (`.to` after `fromTo` with from-only props) → use explicit `fromTo` for anything that fades out.
 
+### Coin + live fees counter (2026-10-19)
+- Coin CA (pump.fun, SOL-paired): `6t7XgUW2q2KcXFAUexPXCwLekXemczRdNx5RG2Tfpump` — navbar "CA" button (hover = full address, click = copy). (`DaedX…pump` is NOT ours — it's someone's "LOOOONG" coin.)
+- Live fees counter: section `#fees` right above How it works, USD, polls `/api/fees` every 15 s (edge-cached 15 s). Shows $0 until launch, starts by itself.
+- `api/fees.js` reads Solana directly (public RPC, or `SOLANA_RPC_URL` env e.g. a free Helius key if rate-limited): BondingCurve.creator_fee + Pool.creator_fees (waiting) + Pump creator vault (SOL above rent) + PumpSwap creator vault (WSOL ATA) + claims (vault drops in txs that are in both the creator's and the vault's history). SOL→USD via Coinbase (CoinGecko backup). Seeds/offsets checked against pump-fun/pump-public-docs IDLs + live coins.
+- Caveats: fees are per CREATOR wallet (use a fresh launch wallet); changing the coin's creator / fee sharing after launch makes it lose track — user told; non-SOL-paired coins are refused.
+- Device path got a stop at `#fees` (rests left, number right); the animals counter stop is now `.counter:not(#fees)`.
+
 ### Run / deploy
 - Local: `python D:\TamaPad\serve.py` → http://localhost:8080/ (no-cache dev server). Game: /play.html (local) = /play (live).
 - Live: https://tamapet-alpha.vercel.app (Vercel, auto-deploys from GitHub https://github.com/pokuthegoat/TamaPet, branch main). vercel.json: cleanUrls + plain static (no install/build). Everything is pushed.
