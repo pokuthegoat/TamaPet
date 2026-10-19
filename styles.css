@@ -176,6 +176,7 @@ body{position:relative;}
   font-size:13px; font-weight:600; letter-spacing:0.06em;
 }
 .nav__ca:hover, .nav__ca:focus-visible{background:rgba(255,255,255,0.14);}
+.nav__ca-short{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight:500; letter-spacing:0;}
 .nav__ca-pop{
   position:absolute; top:calc(100% + 10px); right:0;
   display:flex; flex-direction:column; align-items:flex-end; gap:4px;

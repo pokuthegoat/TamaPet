@@ -20,6 +20,9 @@ mobileMenu.querySelectorAll('a').forEach(a => {
   const btn = document.getElementById('caBtn');
   if (!btn) return;
   const hint = btn.querySelector('.nav__ca-hint');
+  // the button shows the first characters; the hover panel shows it all (both from data-ca, so they can't differ)
+  btn.querySelector('.nav__ca-short').textContent = `${btn.dataset.ca.slice(0, 5)}…`;
+  btn.querySelector('.nav__ca-addr').textContent = btn.dataset.ca;
   let reset = 0;
   btn.addEventListener('click', async () => {
     const ca = btn.dataset.ca;
